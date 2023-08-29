@@ -4,7 +4,7 @@ import streamlit as st
 
 
 def main():
-    filename = st.selectbox('Choose your file', ('test1', 'test15.csv', 'test30.csv', 'test60.csv', 'test120.csv', 'test1D.csv'))
+    filename = st.selectbox('Choose your file', ('test1.csv', 'test15.csv', 'test30.csv', 'test60.csv', 'test120.csv', 'test1D.csv'))
     master_df = pd.read_csv(filename)
     trimmed_df = master_df[
         ['time', 'open', 'high', 'low', 'close', 'Momemtum', 'Slow Pressure', 'Fast Pressure']].copy()
