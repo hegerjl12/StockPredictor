@@ -9,7 +9,7 @@ def main():
     trimmed_df = master_df[
         ['time', 'open', 'high', 'low', 'close', 'Momemtum', 'Slow Pressure', 'Fast Pressure']].copy()
 
-    trimmed_df['change'] = trimmed_df['high'] - trimmed_df['open']
+    trimmed_df['change'] = trimmed_df['close'] - trimmed_df['open']
 
     m_delta = [0]
     sp_delta = [0]
