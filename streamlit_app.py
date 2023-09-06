@@ -9,9 +9,9 @@ def main():
     trimmed_df = master_df[
         ['time', 'open', 'high', 'low', 'close', 'Momemtum', 'Slow Pressure', 'Fast Pressure']].copy()
 
-    st.dataframe(trimmed_df['close'])
-    st.dataframe(trimmed_df['open'])
-    st.write(trimmed_df['close'][0]-trimmed_df['open'][0])
+   # st.dataframe(trimmed_df['close'])
+  #  st.dataframe(trimmed_df['open'])
+  #  st.write(trimmed_df['close'][0]-trimmed_df['open'][0])
     
     trimmed_df['change'] = trimmed_df['close'] - trimmed_df['open']
 
