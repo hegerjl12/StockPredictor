@@ -2,6 +2,11 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 def main():
+    st.set_page_config(
+        page_title="Ex-stream-ly Cool App",
+        page_icon="🤑",
+        layout="wide",)
+
     # Upload a csv export file
     fileUpload = st.file_uploader('Choose your file', type='csv')
     if fileUpload is not None:
@@ -47,10 +52,13 @@ def main():
             loses = []
             both = [0]
 
-            momentumInput = st.slider('Choose Momentum Threshold', 0, 30, value=10)
-            spInput = st.slider('Choose Slow Pressure Threshold', 0, 50, value=0)
-            fpInput = st.slider('Choose Fast Pressure Threshold', 0, 200, value=50)
-            winInput = st.slider('Choose a Win Threshold', 0.0, 1.0, step=0.1, value=0.5)
+            callInputExpander = st.expander('Expand to see inputs')
+            with callInputExpander:
+
+                momentumInput = st.slider('Choose Momentum Threshold', 0, 30, value=10)
+                spInput = st.slider('Choose Slow Pressure Threshold', 0, 50, value=0)
+                fpInput = st.slider('Choose Fast Pressure Threshold', 0, 200, value=50)
+                winInput = st.slider('Choose a Win Threshold', 0.0, 1.0, step=0.1, value=0.5)
 
             for i in range((len(trimmed_df)-1)):
                 if trimmed_df.loc[i, 'm_delta'] > momentumInput and trimmed_df.loc[i, 'sp_delta'] > spInput and trimmed_df.loc[i, 'fp_delta'] > fpInput:
@@ -70,6 +78,7 @@ def main():
 
             st.write('CountWin: ', count_win, np.mean(wins))
             st.write('CountLose:', count_lose, np.mean(loses))
+            st.write('Win Percent: ', count_win/(count_win+count_lose)*100, '%')
 
             lastRow = trimmed_df.tail(1)
             prediction = lastRow['w_or_l'].iloc[0]
@@ -78,9 +87,9 @@ def main():
 
             if lastRow['m_delta'].iloc[0] > momentumInput and lastRow['sp_delta'].iloc[0] > spInput and \
                     lastRow['fp_delta'].iloc[0] > fpInput:
-                st.write('BUY!')
+                st.metric(label="BUY", value=lastRow['close'].iloc[0], delta="CALL")
             else:
-                st.write('WAIT!')
+                st.error('WAIT!')
 
         with PutTab:
             # Count the wins/loses
@@ -90,10 +99,13 @@ def main():
             loses = []
             both = [0]
 
-            momentumInput = st.slider('Choose Momentum Threshold', -30, 0, value=-10)
-            spInput = st.slider('Choose Slow Pressure Threshold', -50, 0, value=0)
-            fpInput = st.slider('Choose Fast Pressure Threshold', -200, 0, value=-50)
-            winInput = st.slider('Choose a Win Threshold', -1.0, 0.0, step=0.1, value=-0.5)
+            putInputExpander = st.expander('Expand to see inputs')
+            with putInputExpander:
+
+                momentumInput = st.slider('Choose Momentum Threshold', -30, 0, value=-10)
+                spInput = st.slider('Choose Slow Pressure Threshold', -50, 0, value=0)
+                fpInput = st.slider('Choose Fast Pressure Threshold', -200, 0, value=-50)
+                winInput = st.slider('Choose a Win Threshold', -1.0, 0.0, step=0.1, value=-0.5)
 
             for i in range((len(trimmed_df)-1)):
                 if trimmed_df.loc[i, 'm_delta'] < momentumInput and trimmed_df.loc[i, 'sp_delta'] < spInput and \
@@ -114,6 +126,7 @@ def main():
 
             st.write('CountWin: ', count_win, np.mean(wins))
             st.write('CountLose:', count_lose, np.mean(loses))
+            st.write('Win Percent: ', count_win / (count_win + count_lose)*100, '%')
 
             lastRow = trimmed_df.tail(1)
             prediction = lastRow['w_or_l'].iloc[0]
@@ -122,9 +135,9 @@ def main():
 
             if lastRow['m_delta'].iloc[0] < momentumInput and lastRow['sp_delta'].iloc[0] < spInput and \
                         lastRow['fp_delta'].iloc[0] < fpInput:
-                st.write('BUY!')
+                st.metric(label="BUY", value=lastRow['close'].iloc[0], delta="-PUT")
             else:
-                st.write('WAIT!')
+                st.error('WAIT!')
 
 
         return
