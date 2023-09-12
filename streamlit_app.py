@@ -1,6 +1,11 @@
 import pandas as pd
 import numpy as np
 import streamlit as st
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+
 def main():
     st.set_page_config(
         page_title="Stonkz Predictor",
@@ -72,7 +77,7 @@ def main():
                         loses.append(trimmed_df.loc[i+1,'change'])
                         both.append(0)
                 else:
-                    both.append(0)
+                    both.append(-1)
 
             trimmed_df['w_or_l'] = both
 
@@ -81,7 +86,6 @@ def main():
             st.write('Win Percent: ', count_win/(count_win+count_lose)*100, '%')
 
             lastRow = trimmed_df.tail(1)
-            prediction = lastRow['w_or_l'].iloc[0]
 
             st.write(lastRow)
 
@@ -90,6 +94,33 @@ def main():
                 st.metric(label="BUY", value=lastRow['close'].iloc[0], delta="CALL")
             else:
                 st.error('WAIT!')
+
+            X_feed = trimmed_df[trimmed_df['w_or_l'] >= 0]
+            X = X_feed.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close'], axis=1).values
+            y = X_feed['w_or_l'].values
+
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
+
+            dt = DecisionTreeClassifier(max_depth=2, random_state=12)
+            dt.fit(X_train, y_train)
+
+            y_pred = dt.predict(X_test)
+            accy = accuracy_score(y_test, y_pred)
+
+            st.write("Accuracy: ", accy)
+
+            results_df = pd.DataFrame({'pred': y_pred, 'actual':y_test})
+
+
+
+            predictor_df = pd.DataFrame(trimmed_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'w_or_l'])).values
+            if dt.predict(predictor_df.T) == 1:
+                st.write("ML Says Buy")
+            else:
+                st.write("ML Says Wait")
+
+
+
 
         with PutTab:
             # Count the wins/loses
