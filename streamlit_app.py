@@ -45,14 +45,14 @@ def main():
             count_lose = 0
             wins = []
             loses = []
-            both = []
+            both = [0]
 
             momentumInput = st.slider('Choose Momentum Threshold', 0, 30, value=10)
             spInput = st.slider('Choose Slow Pressure Threshold', 0, 50, value=0)
             fpInput = st.slider('Choose Fast Pressure Threshold', 0, 200, value=50)
             winInput = st.slider('Choose a Win Threshold', 0.0, 1.0, step=0.1, value=0.5)
 
-            for i in range(len(trimmed_df)):
+            for i in range((len(trimmed_df)-1)):
                 if trimmed_df.loc[i, 'm_delta'] > momentumInput and trimmed_df.loc[i, 'sp_delta'] > spInput and trimmed_df.loc[i, 'fp_delta'] > fpInput:
                     #st.write(i+1, trimmed_df.loc[i+1, 'change'])
                     if trimmed_df.loc[i+1,'change'] > winInput:
@@ -76,7 +76,8 @@ def main():
 
             st.write(lastRow)
 
-            if prediction == 1:
+            if lastRow['m_delta'].iloc[0] > momentumInput and lastRow['sp_delta'].iloc[0] > spInput and \
+                    lastRow['fp_delta'].iloc[0] > fpInput:
                 st.write('BUY!')
             else:
                 st.write('WAIT!')
@@ -87,17 +88,17 @@ def main():
             count_lose = 0
             wins = []
             loses = []
-            both = []
+            both = [0]
 
             momentumInput = st.slider('Choose Momentum Threshold', -30, 0, value=-10)
             spInput = st.slider('Choose Slow Pressure Threshold', -50, 0, value=0)
             fpInput = st.slider('Choose Fast Pressure Threshold', -200, 0, value=-50)
             winInput = st.slider('Choose a Win Threshold', -1.0, 0.0, step=0.1, value=-0.5)
 
-            for i in range(len(trimmed_df)):
+            for i in range((len(trimmed_df)-1)):
                 if trimmed_df.loc[i, 'm_delta'] < momentumInput and trimmed_df.loc[i, 'sp_delta'] < spInput and \
                         trimmed_df.loc[i, 'fp_delta'] < fpInput:
-                    # st.write(i+1, trimmed_df.loc[i+1, 'change'])
+
                     if trimmed_df.loc[i + 1, 'change'] < winInput:
                         count_win += 1
                         wins.append(trimmed_df.loc[i + 1, 'change'])
@@ -119,7 +120,8 @@ def main():
 
             st.write(lastRow)
 
-            if prediction == 1:
+            if lastRow['m_delta'].iloc[0] < momentumInput and lastRow['sp_delta'].iloc[0] < spInput and \
+                        lastRow['fp_delta'].iloc[0] < fpInput:
                 st.write('BUY!')
             else:
                 st.write('WAIT!')
