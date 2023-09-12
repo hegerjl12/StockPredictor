@@ -3,7 +3,7 @@ import numpy as np
 import streamlit as st
 def main():
     st.set_page_config(
-        page_title="Ex-stream-ly Cool App",
+        page_title="Stonkz Predictor",
         page_icon="🤑",
         layout="wide",)
 
