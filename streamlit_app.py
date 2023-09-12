@@ -4,7 +4,6 @@ import streamlit as st
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
 
 def main():
     st.set_page_config(
