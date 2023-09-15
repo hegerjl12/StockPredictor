@@ -23,10 +23,10 @@ def main():
         column_keys = master_df.columns
 
 
-        trimmed_df = master_df[
+        db_df = master_df[
             ['time', 'open', 'high', 'low', 'close', 'Momemtum', 'Slow Pressure', 'Fast Pressure']].copy()
 
-       # for index, row in trimmed_df.iterrows():
+       # for index, row in db_df.iterrows():
         #    spy_db.put({'time':row['time'], 'open':row['open'], 'high':row['high'], 'low':row['low'], 'close':row['close'], 'Momemtum':row['Momemtum'], 'Slow Pressure':row['Slow Pressure'], 'Fast Pressure':row['Fast Pressure']}, key=row['time'])
 
         # Choose to use the high or the close for the calculation of change
@@ -46,26 +46,26 @@ def main():
         db_df = pd.DataFrame(allItems)
         st.write(db_df)
 
-        trimmed_df['change'] = trimmed_df[calcValue] - trimmed_df['open']
+        db_df['change'] = db_df[calcValue] - db_df['open']
 
         # add column for the deltas for momentum, sp, fp
         m_delta = [0]
         sp_delta = [0]
         fp_delta = [0]
 
-        for i in range(len(trimmed_df['Momemtum'])):
+        for i in range(len(db_df['Momemtum'])):
 
-            if i < len(trimmed_df['Momemtum']) - 1:
-                m_delta.append(trimmed_df.loc[i + 1, 'Momemtum'] - trimmed_df.loc[i, 'Momemtum'])
-                sp_delta.append(trimmed_df.loc[i + 1, 'Slow Pressure'] - trimmed_df.loc[i, 'Slow Pressure'])
-                fp_delta.append(trimmed_df.loc[i + 1, 'Fast Pressure'] - trimmed_df.loc[i, 'Fast Pressure'])
+            if i < len(db_df['Momemtum']) - 1:
+                m_delta.append(db_df.loc[i + 1, 'Momemtum'] - db_df.loc[i, 'Momemtum'])
+                sp_delta.append(db_df.loc[i + 1, 'Slow Pressure'] - db_df.loc[i, 'Slow Pressure'])
+                fp_delta.append(db_df.loc[i + 1, 'Fast Pressure'] - db_df.loc[i, 'Fast Pressure'])
 
-        trimmed_df['m_delta'] = m_delta
-        trimmed_df['sp_delta'] = sp_delta
-        trimmed_df['fp_delta'] = fp_delta
+        db_df['m_delta'] = m_delta
+        db_df['sp_delta'] = sp_delta
+        db_df['fp_delta'] = fp_delta
 
         dfExpander = st.expander('Expand to see DF')
-        dfExpander.dataframe(trimmed_df)
+        dfExpander.dataframe(db_df)
 
         CallTab, PutTab = st.tabs(['Calls', 'Puts'])
 
@@ -85,27 +85,27 @@ def main():
                 fpInput = st.slider('Choose Fast Pressure Threshold', 0, 200, value=50)
                 winInput = st.slider('Choose a Win Threshold', 0.0, 1.0, step=0.1, value=0.5)
 
-            for i in range((len(trimmed_df)-1)):
-                if trimmed_df.loc[i, 'm_delta'] > momentumInput and trimmed_df.loc[i, 'sp_delta'] > spInput and trimmed_df.loc[i, 'fp_delta'] > fpInput:
-                    #st.write(i+1, trimmed_df.loc[i+1, 'change'])
-                    if trimmed_df.loc[i+1,'change'] > winInput:
+            for i in range((len(db_df)-1)):
+                if db_df.loc[i, 'm_delta'] > momentumInput and db_df.loc[i, 'sp_delta'] > spInput and db_df.loc[i, 'fp_delta'] > fpInput:
+                    #st.write(i+1, db_df.loc[i+1, 'change'])
+                    if db_df.loc[i+1,'change'] > winInput:
                         count_win += 1
-                        wins.append(trimmed_df.loc[i+1,'change'])
+                        wins.append(db_df.loc[i+1,'change'])
                         both.append(1)
                     else:
                         count_lose += 1
-                        loses.append(trimmed_df.loc[i+1,'change'])
+                        loses.append(db_df.loc[i+1,'change'])
                         both.append(0)
                 else:
                     both.append(-1)
 
-            trimmed_df['w_or_l'] = both
+            db_df['w_or_l'] = both
 
             st.write('CountWin: ', count_win, np.mean(wins))
             st.write('CountLose:', count_lose, np.mean(loses))
             st.write('Win Percent: ', count_win/(count_win+count_lose)*100, '%')
 
-            lastRow = trimmed_df.tail(1)
+            lastRow = db_df.tail(1)
 
             st.write(lastRow)
 
@@ -115,7 +115,7 @@ def main():
             else:
                 st.error('WAIT!')
 
-            X_feed = trimmed_df[trimmed_df['w_or_l'] >= 0]
+            X_feed = db_df[db_df['w_or_l'] >= 0]
             X = X_feed.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close'], axis=1).values
             y = X_feed['w_or_l'].values
 
@@ -132,7 +132,7 @@ def main():
             results_df = pd.DataFrame({'pred': y_pred, 'actual':y_test})
 
 
-            predictor_df = pd.DataFrame(trimmed_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'w_or_l'])).values
+            predictor_df = pd.DataFrame(db_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'w_or_l'])).values
             if dt.predict(predictor_df.T) == 1:
                 st.write("ML Says Buy")
             else:
@@ -157,28 +157,28 @@ def main():
                 fpInput = st.slider('Choose Fast Pressure Threshold', -200, 0, value=-50)
                 winInput = st.slider('Choose a Win Threshold', -1.0, 0.0, step=0.1, value=-0.5)
 
-            for i in range((len(trimmed_df)-1)):
-                if trimmed_df.loc[i, 'm_delta'] < momentumInput and trimmed_df.loc[i, 'sp_delta'] < spInput and \
-                        trimmed_df.loc[i, 'fp_delta'] < fpInput:
+            for i in range((len(db_df)-1)):
+                if db_df.loc[i, 'm_delta'] < momentumInput and db_df.loc[i, 'sp_delta'] < spInput and \
+                        db_df.loc[i, 'fp_delta'] < fpInput:
 
-                    if trimmed_df.loc[i + 1, 'change'] < winInput:
+                    if db_df.loc[i + 1, 'change'] < winInput:
                         count_win += 1
-                        wins.append(trimmed_df.loc[i + 1, 'change'])
+                        wins.append(db_df.loc[i + 1, 'change'])
                         both.append(1)
                     else:
                         count_lose += 1
-                        loses.append(trimmed_df.loc[i + 1, 'change'])
+                        loses.append(db_df.loc[i + 1, 'change'])
                         both.append(0)
                 else:
                     both.append(0)
 
-            trimmed_df['w_or_l'] = both
+            db_df['w_or_l'] = both
 
             st.write('CountWin: ', count_win, np.mean(wins))
             st.write('CountLose:', count_lose, np.mean(loses))
             st.write('Win Percent: ', count_win / (count_win + count_lose)*100, '%')
 
-            lastRow = trimmed_df.tail(1)
+            lastRow = db_df.tail(1)
             prediction = lastRow['w_or_l'].iloc[0]
 
             st.write(lastRow)
