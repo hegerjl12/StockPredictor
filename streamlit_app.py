@@ -103,6 +103,8 @@ def main():
 
             if count_win + count_lose > 0:
                 winPercentage = count_win/(count_win+count_lose)*100
+            else:
+                winPercentage = 1
 
             st.write('CountWin: ', count_win, np.mean(wins))
             st.write('CountLose:', count_lose, np.mean(loses))
@@ -179,6 +181,8 @@ def main():
 
             if count_win + count_lose > 0:
                 winPercentage = count_win / (count_win + count_lose)*100
+            else:
+                winPercentage = 1
 
             st.write('CountWin: ', count_win, np.mean(wins))
             st.write('CountLose:', count_lose, np.mean(loses))
