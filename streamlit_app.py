@@ -44,7 +44,6 @@ def main():
             allItems += res.items
 
         db_df = pd.DataFrame(allItems)
-        st.write(db_df)
 
         db_df['change'] = db_df[calcValue] - db_df['open']
 
