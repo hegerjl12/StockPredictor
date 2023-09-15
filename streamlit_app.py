@@ -36,8 +36,15 @@ def main():
             options=['high', 'low', 'close'],
         )
 
-        db_df = spy_db.fetch()
-        st.write(db_df)
+        res = spy_db.fetch()
+        allItems = res.items
+
+        while res.last:
+            res = spy_db.fetch(last=res.last)
+            allItems += res.items
+
+        st.write(allItems)
+
         trimmed_df['change'] = trimmed_df[calcValue] - trimmed_df['open']
 
         # add column for the deltas for momentum, sp, fp
