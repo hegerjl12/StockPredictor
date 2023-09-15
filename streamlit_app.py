@@ -4,6 +4,7 @@ import streamlit as st
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
+from deta import Deta
 
 def main():
     st.set_page_config(
@@ -11,12 +12,22 @@ def main():
         page_icon="🤑",
         layout="wide",)
 
+    deta = Deta('b0hw2ref5az_HYnGn4FqS9gNhcBbT83D6KTVFsM52Hzz')
+    spy_db = deta.Base('spy_db')
+
+
     # Upload a csv export file
     fileUpload = st.file_uploader('Choose your file', type='csv')
     if fileUpload is not None:
         master_df = pd.read_csv(fileUpload)
+        column_keys = master_df.columns
+
+
         trimmed_df = master_df[
             ['time', 'open', 'high', 'low', 'close', 'Momemtum', 'Slow Pressure', 'Fast Pressure']].copy()
+
+        for index, row in trimmed_df.iterrows():
+            spy_db.put({'time':row['time'], 'open':row['open'], 'high':row['high'], 'low':row['low'], 'close':row['close'], 'Momemtum':row['Momemtum'], 'Slow Pressure':row['Slow Pressure'], 'Fast Pressure':row['Fast Pressure']}, key=row['time'])
 
         # Choose to use the high or the close for the calculation of change
         calcValue = st.radio(
@@ -117,7 +128,7 @@ def main():
             else:
                 st.write("ML Says Wait")
 
-
+            st.write(results_df)
 
 
         with PutTab:

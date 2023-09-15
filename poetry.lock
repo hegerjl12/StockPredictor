@@ -253,6 +253,20 @@ files = [
 ]
 
 [[package]]
+name = "deta"
+version = "1.2.0"
+description = "Python SDK for Deta Base & Deta Drive."
+optional = false
+python-versions = "*"
+files = [
+    {file = "deta-1.2.0-py3-none-any.whl", hash = "sha256:f1592b8e1809c6d284754521c8bddc236736ed50df8cfecdde3ad4e86fdd8860"},
+    {file = "deta-1.2.0.tar.gz", hash = "sha256:2573504fc07f05e1118175221ebe2bbfb822b9903f8f268bf851613a5b279557"},
+]
+
+[package.extras]
+async = ["aiohttp (>=3,<4)"]
+
+[[package]]
 name = "fonttools"
 version = "4.42.1"
 description = "Tools to manipulate font files"
@@ -1595,4 +1609,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "4b7c538bbe5d2d445f9e99e183e798795133308e7b85f38d05f0cb2986d0f188"
+content-hash = "20a040493404e42d3e228d11c3376641c9b17990e32dafec66f2adc14a912404"
