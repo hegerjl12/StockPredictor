@@ -120,7 +120,7 @@ def main():
                 st.error('WAIT!')
 
             X_feed = db_df[db_df['w_or_l'] >= 0]
-            X = X_feed.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close'], axis=1).values
+            X = X_feed.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close','key'], axis=1).values
             y = X_feed['w_or_l'].values
 
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
