@@ -37,6 +37,7 @@ def main():
         )
 
         db_df = spy_db.fetch()
+        st.write(db_df)
         trimmed_df['change'] = trimmed_df[calcValue] - trimmed_df['open']
 
         # add column for the deltas for momentum, sp, fp
