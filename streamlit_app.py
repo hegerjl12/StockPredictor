@@ -26,8 +26,8 @@ def main():
         trimmed_df = master_df[
             ['time', 'open', 'high', 'low', 'close', 'Momemtum', 'Slow Pressure', 'Fast Pressure']].copy()
 
-        for index, row in trimmed_df.iterrows():
-            spy_db.put({'time':row['time'], 'open':row['open'], 'high':row['high'], 'low':row['low'], 'close':row['close'], 'Momemtum':row['Momemtum'], 'Slow Pressure':row['Slow Pressure'], 'Fast Pressure':row['Fast Pressure']}, key=row['time'])
+       # for index, row in trimmed_df.iterrows():
+        #    spy_db.put({'time':row['time'], 'open':row['open'], 'high':row['high'], 'low':row['low'], 'close':row['close'], 'Momemtum':row['Momemtum'], 'Slow Pressure':row['Slow Pressure'], 'Fast Pressure':row['Fast Pressure']}, key=row['time'])
 
         # Choose to use the high or the close for the calculation of change
         calcValue = st.radio(
@@ -36,6 +36,7 @@ def main():
             options=['high', 'low', 'close'],
         )
 
+        db_df = spy_db.fetch()
         trimmed_df['change'] = trimmed_df[calcValue] - trimmed_df['open']
 
         # add column for the deltas for momentum, sp, fp
