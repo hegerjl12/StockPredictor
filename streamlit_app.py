@@ -136,7 +136,7 @@ def main():
             results_df = pd.DataFrame({'pred': y_pred, 'actual':y_test})
 
 
-            predictor_df = pd.DataFrame(db_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'w_or_l'])).values
+            predictor_df = pd.DataFrame(db_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'key', 'w_or_l'])).values
             if dt.predict(predictor_df.T) == 1:
                 st.write("ML Says Buy")
             else:
