@@ -101,9 +101,12 @@ def main():
 
             db_df['w_or_l'] = both
 
+            if count_win + count_lose > 0:
+                winPercentage = count_win/(count_win+count_lose)*100
+
             st.write('CountWin: ', count_win, np.mean(wins))
             st.write('CountLose:', count_lose, np.mean(loses))
-            st.write('Win Percent: ', count_win/(count_win+count_lose)*100, '%')
+            st.write('Win Percent: ', winPercentage, '%')
 
             lastRow = db_df.tail(1)
 
@@ -174,9 +177,12 @@ def main():
 
             db_df['w_or_l'] = both
 
+            if count_win + count_lose > 0:
+                winPercentage = count_win / (count_win + count_lose)*100
+
             st.write('CountWin: ', count_win, np.mean(wins))
             st.write('CountLose:', count_lose, np.mean(loses))
-            st.write('Win Percent: ', count_win / (count_win + count_lose)*100, '%')
+            st.write('Win Percent: ', winPercentage, '%')
 
             lastRow = db_df.tail(1)
             prediction = lastRow['w_or_l'].iloc[0]
