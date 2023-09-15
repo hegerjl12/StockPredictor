@@ -43,6 +43,7 @@ def main():
             res = spy_db.fetch(last=res.last)
             allItems += res.items
 
+        db_df = pd.DataFrame(allItems)
         st.write(allItems)
 
         trimmed_df['change'] = trimmed_df[calcValue] - trimmed_df['open']
