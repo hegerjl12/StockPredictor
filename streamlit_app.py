@@ -114,7 +114,7 @@ def main():
             st.write('CountLose:', count_lose, np.mean(loses))
             st.write('Win Percent: ', winPercentage, '%')
 
-            lastRow = db_df.tail(1)
+            lastRow = db_df.tail(5)
 
             st.write(lastRow)
 
@@ -142,6 +142,7 @@ def main():
 
 
             predictor_df = pd.DataFrame(db_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'key', 'w_or_l'])).values
+            st.write(predictor_df)
             if dt.predict(predictor_df.T) == 1:
                 st.write("ML Says Buy")
             else:
