@@ -12,22 +12,27 @@ def main():
         page_icon="🤑",
         layout="wide",)
 
-    deta = Deta('b0hw2ref5az_HYnGn4FqS9gNhcBbT83D6KTVFsM52Hzz')
+    deta = Deta(st.secrets['DB_TOKEN'])
     spy_db = deta.Base('spy_db')
 
 
     # Upload a csv export file
-    fileUpload = st.file_uploader('Choose your file', type='csv')
+    fileUpload = st.file_uploader('Upload SPY 1 HR Chart Data', type='csv')
     if fileUpload is not None:
         master_df = pd.read_csv(fileUpload)
-        column_keys = master_df.columns
 
-
-        db_df = master_df[
+        #trim the upload to just columns we care about
+        spy_df = master_df[
             ['time', 'open', 'high', 'low', 'close', 'Momemtum', 'Slow Pressure', 'Fast Pressure']].copy()
 
-        for index, row in db_df.iterrows():
+        # Add the rows to the DB
+        for index, row in spy_df.iterrows():
             spy_db.put({'time':row['time'], 'open':row['open'], 'high':row['high'], 'low':row['low'], 'close':row['close'], 'Momemtum':row['Momemtum'], 'Slow Pressure':row['Slow Pressure'], 'Fast Pressure':row['Fast Pressure']}, key=row['time'])
+
+
+
+
+
 
         # Choose to use the high or the close for the calculation of change
         calcValue = st.radio(
