@@ -226,7 +226,7 @@ def main():
             pred_time = st.time_input('Choose Candle', datetime.time(7,30), step=1800)
             candle_string = str(pred_date) + 'T' + str(pred_time) + '-07:00'
             td = datetime.timedelta(hours=1)
-            candle_string_prev = pred_date + 'T' + str(pred_time-td) + '-07:00'
+            candle_string_prev = str(pred_date) + 'T' + str(pred_time-td) + '-07:00'
             st.write(candle_string_prev)
             db_df = spy_db.get(candle_string)
             st.write(db_df)
