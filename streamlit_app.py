@@ -159,7 +159,7 @@ def main():
             )
             #####spy_models.put('dt_model.pkl', f)
             download = spy_models.get('dt_model.pkl')
-            new_dt = pickle.loads(download)
+            new_dt = pickle.loads(download.read())
 
             predictor_df = pd.DataFrame(db_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'key', 'w_or_l'])).values
             st.write(predictor_df)
