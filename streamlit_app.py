@@ -226,6 +226,7 @@ def main():
             pred_time = st.time_input('Choose Candle', datetime.time(6,30), step=1800)
             candle_string = str(pred_date) + 'T' + str(pred_time) + ':00-07:00'
             #candle_string_prev = pred_date + 'T' +
+            st.write(candle_string)
             db_df = spy_db.get(candle_string)
             st.write(db_df)
             #db_df['change'] = db_df[calcValue] - db_df['open']
@@ -259,51 +260,51 @@ def main():
 
 
         with PutTab:
-            calcValue = st.radio(
-                'Choose to use High or Close for Calc',
-                key='put_calc_value',
-                options=['high', 'low', 'close'],
-                index=2,
-            )
-
-            res = spy_db.fetch()
-            allItems = res.items
-
-            while res.last:
-                res = spy_db.fetch(last=res.last)
-                allItems += res.items
-
-            db_df = pd.DataFrame(allItems)
-
-            db_df['change'] = db_df[calcValue] - db_df['open']
-
-            # add column for the deltas for momentum, sp, fp
-            m_delta = [0]
-            sp_delta = [0]
-            fp_delta = [0]
-
-            for i in range(len(db_df['Momemtum'])):
-
-                if i < len(db_df['Momemtum']) - 1:
-                    m_delta.append(db_df.loc[i + 1, 'Momemtum'] - db_df.loc[i, 'Momemtum'])
-                    sp_delta.append(db_df.loc[i + 1, 'Slow Pressure'] - db_df.loc[i, 'Slow Pressure'])
-                    fp_delta.append(db_df.loc[i + 1, 'Fast Pressure'] - db_df.loc[i, 'Fast Pressure'])
-
-            db_df['m_delta'] = m_delta
-            db_df['sp_delta'] = sp_delta
-            db_df['fp_delta'] = fp_delta
-
-
-            download = spy_models.get('dt_model.pkl')
-            new_dt = pickle.loads(download.read())
-
-            predictor_df = pd.DataFrame(
-                db_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'key'])).values
-            st.write(predictor_df)
-            if new_dt.predict(predictor_df.T) == 1:
-                st.write("ML Says Buy")
-            else:
-                st.write("ML Says Wait")
+            # calcValue = st.radio(
+            #     'Choose to use High or Close for Calc',
+            #     key='put_calc_value',
+            #     options=['high', 'low', 'close'],
+            #     index=2,
+            # )
+            #
+            # res = spy_db.fetch()
+            # allItems = res.items
+            #
+            # while res.last:
+            #     res = spy_db.fetch(last=res.last)
+            #     allItems += res.items
+            #
+            # db_df = pd.DataFrame(allItems)
+            #
+            # db_df['change'] = db_df[calcValue] - db_df['open']
+            #
+            # # add column for the deltas for momentum, sp, fp
+            # m_delta = [0]
+            # sp_delta = [0]
+            # fp_delta = [0]
+            #
+            # for i in range(len(db_df['Momemtum'])):
+            #
+            #     if i < len(db_df['Momemtum']) - 1:
+            #         m_delta.append(db_df.loc[i + 1, 'Momemtum'] - db_df.loc[i, 'Momemtum'])
+            #         sp_delta.append(db_df.loc[i + 1, 'Slow Pressure'] - db_df.loc[i, 'Slow Pressure'])
+            #         fp_delta.append(db_df.loc[i + 1, 'Fast Pressure'] - db_df.loc[i, 'Fast Pressure'])
+            #
+            # db_df['m_delta'] = m_delta
+            # db_df['sp_delta'] = sp_delta
+            # db_df['fp_delta'] = fp_delta
+            #
+            #
+            # download = spy_models.get('dt_model.pkl')
+            # new_dt = pickle.loads(download.read())
+            #
+            # predictor_df = pd.DataFrame(
+            #     db_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'key'])).values
+            # st.write(predictor_df)
+            # if new_dt.predict(predictor_df.T) == 1:
+            #     st.write("ML Says Buy")
+            # else:
+            #     st.write("ML Says Wait")
 
 
 
