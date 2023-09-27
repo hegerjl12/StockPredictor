@@ -6,6 +6,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from deta import Deta
 import pickle
+import io
 
 def main():
     st.set_page_config(
