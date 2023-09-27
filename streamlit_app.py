@@ -260,6 +260,7 @@ def main():
 
 
         with PutTab:
+            st.write("placeholder")
             # calcValue = st.radio(
             #     'Choose to use High or Close for Calc',
             #     key='put_calc_value',
