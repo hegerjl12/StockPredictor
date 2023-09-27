@@ -207,7 +207,7 @@ def main():
         with CallTab:
             calcValue = st.radio(
                 'Choose to use High or Close for Calc',
-                key='calc_value',
+                key='call_calc_value',
                 options=['high', 'low', 'close'],
                 index=2,
             )
@@ -277,7 +277,7 @@ def main():
         with PutTab:
             calcValue = st.radio(
                 'Choose to use High or Close for Calc',
-                key='calc_value',
+                key='put_calc_value',
                 options=['high', 'low', 'close'],
                 index=2,
             )
