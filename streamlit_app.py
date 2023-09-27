@@ -149,8 +149,8 @@ def main():
 
             results_df = pd.DataFrame({'pred': y_pred, 'actual':y_test})
 
-            with open('dt_model.pkl', 'wb') as f:
-                pickle.dump(dt, f)
+            #with open('dt_model.pkl', 'wb') as f:
+             #   pickle.dump(dt, f)
 
             st.download_button(
                 "Download Model",
@@ -158,11 +158,12 @@ def main():
                 file_name="dt_model.pkl",
             )
             #####spy_models.put('dt_model.pkl', f)
-
+            download = spy_models.get('dt_model.pkl')
+            new_dt = pickle.loads(download)
 
             predictor_df = pd.DataFrame(db_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'key', 'w_or_l'])).values
             st.write(predictor_df)
-            if dt.predict(predictor_df.T) == 1:
+            if new_dt.predict(predictor_df.T) == 1:
                 st.write("ML Says Buy")
             else:
                 st.write("ML Says Wait")
