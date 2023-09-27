@@ -15,24 +15,27 @@ def main():
     deta = Deta(st.secrets['DB_TOKEN'])
     spy_db = deta.Base('spy_db')
 
+    newDataTab, modelsTab, predictorTab = st.tabs(['Upload Data', 'Train and Save Models', 'Predictions'])
 
-    # Upload a csv export file
-    fileUpload = st.file_uploader('Upload SPY 1 HR Chart Data', type='csv')
-    if fileUpload is not None:
-        master_df = pd.read_csv(fileUpload)
+    with newDataTab:
+        # Upload a csv export file
+        fileUpload = st.file_uploader('Upload SPY 1 HR Chart Data', type='csv')
 
-        #trim the upload to just columns we care about
-        spy_df = master_df[
-            ['time', 'open', 'high', 'low', 'close', 'Momemtum', 'Slow Pressure', 'Fast Pressure']].copy()
+        if fileUpload is not None:
+            newData_df = pd.read_csv(fileUpload)
 
-        # Add the rows to the DB
-        for index, row in spy_df.iterrows():
-            spy_db.put({'time':row['time'], 'open':row['open'], 'high':row['high'], 'low':row['low'], 'close':row['close'], 'Momemtum':row['Momemtum'], 'Slow Pressure':row['Slow Pressure'], 'Fast Pressure':row['Fast Pressure']}, key=row['time'])
+            # trim the upload to just columns we care about
+            spy_df = newData_df[
+                ['time', 'open', 'high', 'low', 'close', 'Momemtum', 'Slow Pressure', 'Fast Pressure']].copy()
 
+            # Add the rows to the DB
+            for index, row in spy_df.iterrows():
+                spy_db.put({'time': row['time'], 'open': row['open'], 'high': row['high'], 'low': row['low'],
+                            'close': row['close'], 'Momemtum': row['Momemtum'], 'Slow Pressure': row['Slow Pressure'],
+                            'Fast Pressure': row['Fast Pressure']}, key=row['time'])
 
-
-
-
+    with modelsTab:
+        st.write('Placeholder')
 
         # Choose to use the high or the close for the calculation of change
         calcValue = st.radio(
@@ -40,6 +43,8 @@ def main():
             key='calc_value',
             options=['high', 'low', 'close'],
         )
+
+    with predictorTab:
 
         res = spy_db.fetch()
         allItems = res.items
@@ -204,8 +209,7 @@ def main():
             else:
                 st.error('WAIT!')
 
-
-        return
+    return
 
 
 if __name__ == "__main__":
