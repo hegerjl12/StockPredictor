@@ -158,7 +158,7 @@ def main():
             download = spy_models.get('dt_model.pkl')
             new_dt = pickle.loads(download.read())
 
-            predictor_df = pd.DataFrame(db_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'key', 'w_or_l'])).values
+            predictor_df = pd.DataFrame(db_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'key'])).values
             st.write(predictor_df)
             if new_dt.predict(predictor_df.T) == 1:
                 st.write("ML Says Buy")
@@ -174,7 +174,7 @@ def main():
             new_dt = pickle.loads(download.read())
 
             predictor_df = pd.DataFrame(
-                db_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'key', 'w_or_l'])).values
+                db_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'key'])).values
             st.write(predictor_df)
             if new_dt.predict(predictor_df.T) == 1:
                 st.write("ML Says Buy")
