@@ -148,7 +148,10 @@ def main():
 
             results_df = pd.DataFrame({'pred': y_pred, 'actual':y_test})
 
-            spy_models.put(pickle.dumps(dt), 'dt_model')
+            with open('dt_model.pkl', 'wb') as f:
+                pickle.dump(dt, f)
+
+            spy_models.put('dt_model.pkl', f)
 
 
             predictor_df = pd.DataFrame(db_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'key', 'w_or_l'])).values
