@@ -6,7 +6,6 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from deta import Deta
 import pickle
-import io
 
 def main():
     st.set_page_config(
@@ -38,8 +37,6 @@ def main():
                             'Fast Pressure': row['Fast Pressure']}, key=row['time'])
 
     with modelsTab:
-        st.write('Placeholder')
-
         # Choose to use the high or the close for the calculation of change
         calcValue = st.radio(
             'Choose to use High or Close for Calc',
@@ -48,71 +45,154 @@ def main():
             index=2,
         )
 
-        # Count the wins/loses
-        count_win = 0
-        count_lose = 0
-        wins = []
-        loses = []
-        both = [0]
+        calls_or_puts = st.radio(
+            'Choose to build a model for calls or puts',
+            key='calls_or_puts',
+            options=['Calls', 'Puts'],
+        )
 
-        momentumInput = st.slider('Choose Momentum Threshold', 0, 30, value=10)
-        spInput = st.slider('Choose Slow Pressure Threshold', 0, 50, value=0)
-        fpInput = st.slider('Choose Fast Pressure Threshold', 0, 200, value=50)
+        momentumInput = st.slider('Choose Momentum Threshold', -30, 30, value=0)
+        spInput = st.slider('Choose Slow Pressure Threshold', -50, 50, value=0)
+        fpInput = st.slider('Choose Fast Pressure Threshold', -200, 200, value=0)
         winInput = st.slider('Choose a Win Threshold', 0.0, 1.0, step=0.1, value=0.5)
 
-       # momentumInput = st.slider('Choose Momentum Threshold', -30, 0, value=-10)
-       # spInput = st.slider('Choose Slow Pressure Threshold', -50, 0, value=0)
-       # fpInput = st.slider('Choose Fast Pressure Threshold', -200, 0, value=-50)
-       # winInput = st.slider('Choose a Win Threshold', -1.0, 0.0, step=0.1, value=-0.5)
-
         if st.button('Generate Model'):
-            for i in range((len(db_df) - 1)):
-                if db_df.loc[i, 'm_delta'] > momentumInput and db_df.loc[i, 'sp_delta'] > spInput and db_df.loc[
-                    i, 'fp_delta'] > fpInput:
-                    # st.write(i+1, db_df.loc[i+1, 'change'])
-                    if db_df.loc[i + 1, 'change'] > winInput:
-                        count_win += 1
-                        wins.append(db_df.loc[i + 1, 'change'])
-                        both.append(1)
+            res = spy_db.fetch()
+            allItems = res.items
+
+            while res.last:
+                res = spy_db.fetch(last=res.last)
+                allItems += res.items
+
+            db_df = pd.DataFrame(allItems)
+
+            db_df['change'] = db_df[calcValue] - db_df['open']
+
+            # add column for the deltas for momentum, sp, fp
+            m_delta = [0]
+            sp_delta = [0]
+            fp_delta = [0]
+
+            for i in range(len(db_df['Momemtum'])):
+
+                if i < len(db_df['Momemtum']) - 1:
+                    m_delta.append(db_df.loc[i + 1, 'Momemtum'] - db_df.loc[i, 'Momemtum'])
+                    sp_delta.append(db_df.loc[i + 1, 'Slow Pressure'] - db_df.loc[i, 'Slow Pressure'])
+                    fp_delta.append(db_df.loc[i + 1, 'Fast Pressure'] - db_df.loc[i, 'Fast Pressure'])
+
+            db_df['m_delta'] = m_delta
+            db_df['sp_delta'] = sp_delta
+            db_df['fp_delta'] = fp_delta
+
+            if calls_or_puts == 'Calls':
+                # Count the wins/loses
+                count_win = 0
+                count_lose = 0
+                wins = []
+                loses = []
+                both = [0]
+
+                for i in range((len(db_df) - 1)):
+                    if db_df.loc[i, 'm_delta'] > momentumInput and db_df.loc[i, 'sp_delta'] > spInput and db_df.loc[
+                        i, 'fp_delta'] > fpInput:
+                        # st.write(i+1, db_df.loc[i+1, 'change'])
+                        if db_df.loc[i + 1, 'change'] > winInput:
+                            count_win += 1
+                            wins.append(db_df.loc[i + 1, 'change'])
+                            both.append(1)
+                        else:
+                            count_lose += 1
+                            loses.append(db_df.loc[i + 1, 'change'])
+                            both.append(0)
                     else:
-                        count_lose += 1
-                        loses.append(db_df.loc[i + 1, 'change'])
-                        both.append(0)
+                        both.append(-1)
+
+                db_df['w_or_l'] = both
+
+                if count_win + count_lose > 0:
+                    winPercentage = count_win / (count_win + count_lose) * 100
                 else:
-                    both.append(-1)
+                    winPercentage = 1
 
-            db_df['w_or_l'] = both
+                st.write('CountWin: ', count_win, np.mean(wins))
+                st.write('CountLose:', count_lose, np.mean(loses))
+                st.write('Win Percent: ', winPercentage, '%')
 
-            if count_win + count_lose > 0:
-                winPercentage = count_win / (count_win + count_lose) * 100
-            else:
-                winPercentage = 1
+                X_feed = db_df[db_df['w_or_l'] >= 0]
+                X = X_feed.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key'], axis=1).values
+                y = X_feed['w_or_l'].values
 
-            st.write('CountWin: ', count_win, np.mean(wins))
-            st.write('CountLose:', count_lose, np.mean(loses))
-            st.write('Win Percent: ', winPercentage, '%')
+                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
 
-            X_feed = db_df[db_df['w_or_l'] >= 0]
-            X = X_feed.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key'], axis=1).values
-            y = X_feed['w_or_l'].values
+                dt = DecisionTreeClassifier(max_depth=2, random_state=12)
+                dt.fit(X_train, y_train)
 
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
+                y_pred = dt.predict(X_test)
+                accy = accuracy_score(y_test, y_pred)
 
-            dt = DecisionTreeClassifier(max_depth=2, random_state=12)
-            dt.fit(X_train, y_train)
+                st.write("Accuracy: ", accy)
 
-            y_pred = dt.predict(X_test)
-            accy = accuracy_score(y_test, y_pred)
+                results_df = pd.DataFrame({'pred': y_pred, 'actual': y_test})
 
-            st.write("Accuracy: ", accy)
+                st.download_button(
+                    "Download Model",
+                    data=pickle.dumps(dt),
+                    file_name="dt_model.pkl",
+                )
+            if calls_or_puts == 'Puts':
+                # Count the wins/loses
+                count_win = 0
+                count_lose = 0
+                wins = []
+                loses = []
+                both = [0]
 
-            results_df = pd.DataFrame({'pred': y_pred, 'actual': y_test})
+                for i in range((len(db_df)-1)):
+                     if db_df.loc[i, 'm_delta'] < momentumInput and db_df.loc[i, 'sp_delta'] < spInput and \
+                             db_df.loc[i, 'fp_delta'] < fpInput:
+                         if db_df.loc[i + 1, 'change'] < winInput:
+                             count_win += 1
+                             wins.append(db_df.loc[i + 1, 'change'])
+                             both.append(1)
+                         else:
+                             count_lose += 1
+                             loses.append(db_df.loc[i + 1, 'change'])
+                             both.append(0)
+                     else:
+                         both.append(0)
 
-            st.download_button(
-                "Download Model",
-                data=pickle.dumps(dt),
-                file_name="dt_model.pkl",
-            )
+                db_df['w_or_l'] = both
+
+                if count_win + count_lose > 0:
+                    winPercentage = count_win / (count_win + count_lose)*100
+                else:
+                    winPercentage = 1
+
+                st.write('CountWin: ', count_win, np.mean(wins))
+                st.write('CountLose:', count_lose, np.mean(loses))
+                st.write('Win Percent: ', winPercentage, '%')
+
+                X_feed = db_df[db_df['w_or_l'] >= 0]
+                X = X_feed.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key'], axis=1).values
+                y = X_feed['w_or_l'].values
+
+                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
+
+                dt = DecisionTreeClassifier(max_depth=2, random_state=12)
+                dt.fit(X_train, y_train)
+
+                y_pred = dt.predict(X_test)
+                accy = accuracy_score(y_test, y_pred)
+
+                st.write("Accuracy: ", accy)
+
+                results_df = pd.DataFrame({'pred': y_pred, 'actual': y_test})
+
+                st.download_button(
+                    "Download Model",
+                    data=pickle.dumps(dt),
+                    file_name="dt_model.pkl",
+                )
 
             # with open('dt_model.pkl', 'wb') as f:
             #   pickle.dump(dt, f)
@@ -121,32 +201,6 @@ def main():
 
     with predictorTab:
 
-        res = spy_db.fetch()
-        allItems = res.items
-
-        while res.last:
-            res = spy_db.fetch(last=res.last)
-            allItems += res.items
-
-        db_df = pd.DataFrame(allItems)
-
-        db_df['change'] = db_df[calcValue] - db_df['open']
-
-        # add column for the deltas for momentum, sp, fp
-        m_delta = [0]
-        sp_delta = [0]
-        fp_delta = [0]
-
-        for i in range(len(db_df['Momemtum'])):
-
-            if i < len(db_df['Momemtum']) - 1:
-                m_delta.append(db_df.loc[i + 1, 'Momemtum'] - db_df.loc[i, 'Momemtum'])
-                sp_delta.append(db_df.loc[i + 1, 'Slow Pressure'] - db_df.loc[i, 'Slow Pressure'])
-                fp_delta.append(db_df.loc[i + 1, 'Fast Pressure'] - db_df.loc[i, 'Fast Pressure'])
-
-        db_df['m_delta'] = m_delta
-        db_df['sp_delta'] = sp_delta
-        db_df['fp_delta'] = fp_delta
 
         dfExpander = st.expander('Expand to see DF')
         dfExpander.dataframe(db_df)
