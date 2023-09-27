@@ -6,6 +6,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from deta import Deta
 import pickle
+import datetime
 
 
 def main():
@@ -212,66 +213,49 @@ def main():
                 index=2,
             )
 
-            res = spy_db.fetch()
-            allItems = res.items
+           # res = spy_db.fetch()
+           # allItems = res.items
 
-            while res.last:
-                res = spy_db.fetch(last=res.last)
-                allItems += res.items
+         #   while res.last:
+         #       res = spy_db.fetch(last=res.last)
+          #      allItems += res.items
 
-            db_df = pd.DataFrame(allItems)
+        #    db_df = pd.DataFrame(allItems)
 
-            db_df['change'] = db_df[calcValue] - db_df['open']
+            pred_date = st.date_input('Choose Date', datetime.date.today())
+            pred_time = st.time_input('Choose Candle', datetime.time(6,30), step=1800)
+            candle_string = pred_date + 'T' + pred_time + ':00-07:00'
+            #candle_string_prev = pred_date + 'T' +
+            db_df = spy_db.get(candle_string)
+            st.write(db_df)
+            #db_df['change'] = db_df[calcValue] - db_df['open']
 
             # add column for the deltas for momentum, sp, fp
-            m_delta = [0]
-            sp_delta = [0]
-            fp_delta = [0]
-
-            for i in range(len(db_df['Momemtum'])):
-
-                if i < len(db_df['Momemtum']) - 1:
-                    m_delta.append(db_df.loc[i + 1, 'Momemtum'] - db_df.loc[i, 'Momemtum'])
-                    sp_delta.append(db_df.loc[i + 1, 'Slow Pressure'] - db_df.loc[i, 'Slow Pressure'])
-                    fp_delta.append(db_df.loc[i + 1, 'Fast Pressure'] - db_df.loc[i, 'Fast Pressure'])
-
-            db_df['m_delta'] = m_delta
-            db_df['sp_delta'] = sp_delta
-            db_df['fp_delta'] = fp_delta
-
-            # Count the wins/loses
-            count_win = 0
-            count_lose = 0
-            wins = []
-            loses = []
-            both = [0]
-
-            for i in range((len(db_df) - 1)):
-                if db_df.loc[i, 'm_delta'] > momentumInput and db_df.loc[i, 'sp_delta'] > spInput and db_df.loc[
-                    i, 'fp_delta'] > fpInput:
-                    # st.write(i+1, db_df.loc[i+1, 'change'])
-                    if db_df.loc[i + 1, 'change'] > winInput:
-                        count_win += 1
-                        wins.append(db_df.loc[i + 1, 'change'])
-                        both.append(1)
-                    else:
-                        count_lose += 1
-                        loses.append(db_df.loc[i + 1, 'change'])
-                        both.append(0)
-                else:
-                    both.append(-1)
-
-
-
-            download = spy_models.get('dt_model.pkl')
-            new_dt = pickle.loads(download.read())
-
-            predictor_df = pd.DataFrame(db_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'key'])).values
-            st.write(predictor_df)
-            if new_dt.predict(predictor_df.T) == 1:
-                st.write("ML Says Buy")
-            else:
-                st.write("ML Says Wait")
+            # m_delta = [0]
+            # sp_delta = [0]
+            # fp_delta = [0]
+            #
+            # for i in range(len(db_df['Momemtum'])):
+            #
+            #     if i < len(db_df['Momemtum']) - 1:
+            #         m_delta.append(db_df.loc[i + 1, 'Momemtum'] - db_df.loc[i, 'Momemtum'])
+            #         sp_delta.append(db_df.loc[i + 1, 'Slow Pressure'] - db_df.loc[i, 'Slow Pressure'])
+            #         fp_delta.append(db_df.loc[i + 1, 'Fast Pressure'] - db_df.loc[i, 'Fast Pressure'])
+            #
+            # db_df['m_delta'] = m_delta
+            # db_df['sp_delta'] = sp_delta
+            # db_df['fp_delta'] = fp_delta
+            #
+            #
+            # download = spy_models.get('dt_model.pkl')
+            # new_dt = pickle.loads(download.read())
+            #
+            # predictor_df = pd.DataFrame(db_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'key'])).values
+            # st.write(predictor_df)
+            # if new_dt.predict(predictor_df.T) == 1:
+            #     st.write("ML Says Buy")
+            # else:
+            #     st.write("ML Says Wait")
 
 
         with PutTab:
@@ -308,27 +292,6 @@ def main():
             db_df['m_delta'] = m_delta
             db_df['sp_delta'] = sp_delta
             db_df['fp_delta'] = fp_delta
-
-            # Count the wins/loses
-            count_win = 0
-            count_lose = 0
-            wins = []
-            loses = []
-            both = [0]
-
-            for i in range((len(db_df) - 1)):
-                if db_df.loc[i, 'm_delta'] < momentumInput and db_df.loc[i, 'sp_delta'] < spInput and \
-                        db_df.loc[i, 'fp_delta'] < fpInput:
-                    if db_df.loc[i + 1, 'change'] < winInput:
-                        count_win += 1
-                        wins.append(db_df.loc[i + 1, 'change'])
-                        both.append(1)
-                    else:
-                        count_lose += 1
-                        loses.append(db_df.loc[i + 1, 'change'])
-                        both.append(0)
-                else:
-                    both.append(0)
 
 
             download = spy_models.get('dt_model.pkl')
