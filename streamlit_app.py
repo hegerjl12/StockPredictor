@@ -152,7 +152,12 @@ def main():
             with open('dt_model.pkl', 'wb') as f:
                 pickle.dump(dt, f)
 
-            spy_models.put('dt_model.pkl', f)
+            st.download_button(
+                "Download Model",
+                data=pickle.dumps(dt),
+                file_name="dt_model.pkl",
+            )
+            #####spy_models.put('dt_model.pkl', f)
 
 
             predictor_df = pd.DataFrame(db_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'key', 'w_or_l'])).values
