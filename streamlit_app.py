@@ -202,10 +202,6 @@ def main():
 
     with predictorTab:
 
-
-        dfExpander = st.expander('Expand to see DF')
-        dfExpander.dataframe(db_df)
-
         CallTab, PutTab = st.tabs(['Calls', 'Puts'])
 
         with CallTab:
