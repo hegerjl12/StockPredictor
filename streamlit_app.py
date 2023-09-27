@@ -48,6 +48,77 @@ def main():
             index=2,
         )
 
+        # Count the wins/loses
+        count_win = 0
+        count_lose = 0
+        wins = []
+        loses = []
+        both = [0]
+
+        momentumInput = st.slider('Choose Momentum Threshold', 0, 30, value=10)
+        spInput = st.slider('Choose Slow Pressure Threshold', 0, 50, value=0)
+        fpInput = st.slider('Choose Fast Pressure Threshold', 0, 200, value=50)
+        winInput = st.slider('Choose a Win Threshold', 0.0, 1.0, step=0.1, value=0.5)
+
+       # momentumInput = st.slider('Choose Momentum Threshold', -30, 0, value=-10)
+       # spInput = st.slider('Choose Slow Pressure Threshold', -50, 0, value=0)
+       # fpInput = st.slider('Choose Fast Pressure Threshold', -200, 0, value=-50)
+       # winInput = st.slider('Choose a Win Threshold', -1.0, 0.0, step=0.1, value=-0.5)
+
+        if st.button('Generate Model'):
+            for i in range((len(db_df) - 1)):
+                if db_df.loc[i, 'm_delta'] > momentumInput and db_df.loc[i, 'sp_delta'] > spInput and db_df.loc[
+                    i, 'fp_delta'] > fpInput:
+                    # st.write(i+1, db_df.loc[i+1, 'change'])
+                    if db_df.loc[i + 1, 'change'] > winInput:
+                        count_win += 1
+                        wins.append(db_df.loc[i + 1, 'change'])
+                        both.append(1)
+                    else:
+                        count_lose += 1
+                        loses.append(db_df.loc[i + 1, 'change'])
+                        both.append(0)
+                else:
+                    both.append(-1)
+
+            db_df['w_or_l'] = both
+
+            if count_win + count_lose > 0:
+                winPercentage = count_win / (count_win + count_lose) * 100
+            else:
+                winPercentage = 1
+
+            st.write('CountWin: ', count_win, np.mean(wins))
+            st.write('CountLose:', count_lose, np.mean(loses))
+            st.write('Win Percent: ', winPercentage, '%')
+
+            X_feed = db_df[db_df['w_or_l'] >= 0]
+            X = X_feed.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key'], axis=1).values
+            y = X_feed['w_or_l'].values
+
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
+
+            dt = DecisionTreeClassifier(max_depth=2, random_state=12)
+            dt.fit(X_train, y_train)
+
+            y_pred = dt.predict(X_test)
+            accy = accuracy_score(y_test, y_pred)
+
+            st.write("Accuracy: ", accy)
+
+            results_df = pd.DataFrame({'pred': y_pred, 'actual': y_test})
+
+            st.download_button(
+                "Download Model",
+                data=pickle.dumps(dt),
+                file_name="dt_model.pkl",
+            )
+
+            # with open('dt_model.pkl', 'wb') as f:
+            #   pickle.dump(dt, f)
+
+            #####spy_models.put('dt_model.pkl', f)
+
     with predictorTab:
 
         res = spy_db.fetch()
@@ -83,81 +154,7 @@ def main():
         CallTab, PutTab = st.tabs(['Calls', 'Puts'])
 
         with CallTab:
-            # Count the wins/loses
-            count_win = 0
-            count_lose = 0
-            wins = []
-            loses = []
-            both = [0]
 
-            callInputExpander = st.expander('Expand to see inputs')
-            with callInputExpander:
-
-                momentumInput = st.slider('Choose Momentum Threshold', 0, 30, value=10)
-                spInput = st.slider('Choose Slow Pressure Threshold', 0, 50, value=0)
-                fpInput = st.slider('Choose Fast Pressure Threshold', 0, 200, value=50)
-                winInput = st.slider('Choose a Win Threshold', 0.0, 1.0, step=0.1, value=0.5)
-
-            for i in range((len(db_df)-1)):
-                if db_df.loc[i, 'm_delta'] > momentumInput and db_df.loc[i, 'sp_delta'] > spInput and db_df.loc[i, 'fp_delta'] > fpInput:
-                    #st.write(i+1, db_df.loc[i+1, 'change'])
-                    if db_df.loc[i+1,'change'] > winInput:
-                        count_win += 1
-                        wins.append(db_df.loc[i+1,'change'])
-                        both.append(1)
-                    else:
-                        count_lose += 1
-                        loses.append(db_df.loc[i+1,'change'])
-                        both.append(0)
-                else:
-                    both.append(-1)
-
-            db_df['w_or_l'] = both
-
-            if count_win + count_lose > 0:
-                winPercentage = count_win/(count_win+count_lose)*100
-            else:
-                winPercentage = 1
-
-            st.write('CountWin: ', count_win, np.mean(wins))
-            st.write('CountLose:', count_lose, np.mean(loses))
-            st.write('Win Percent: ', winPercentage, '%')
-
-            lastRow = db_df.tail(5)
-
-            st.write(lastRow)
-
-            if lastRow['m_delta'].iloc[0] > momentumInput and lastRow['sp_delta'].iloc[0] > spInput and \
-                    lastRow['fp_delta'].iloc[0] > fpInput:
-                st.metric(label="BUY", value=lastRow['close'].iloc[0], delta="CALL")
-            else:
-                st.error('WAIT!')
-
-            X_feed = db_df[db_df['w_or_l'] >= 0]
-            X = X_feed.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close','key'], axis=1).values
-            y = X_feed['w_or_l'].values
-
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
-
-            dt = DecisionTreeClassifier(max_depth=2, random_state=12)
-            dt.fit(X_train, y_train)
-
-            y_pred = dt.predict(X_test)
-            accy = accuracy_score(y_test, y_pred)
-
-            st.write("Accuracy: ", accy)
-
-            results_df = pd.DataFrame({'pred': y_pred, 'actual':y_test})
-
-            #with open('dt_model.pkl', 'wb') as f:
-             #   pickle.dump(dt, f)
-
-            st.download_button(
-                "Download Model",
-                data=pickle.dumps(dt),
-                file_name="dt_model.pkl",
-            )
-            #####spy_models.put('dt_model.pkl', f)
             download = spy_models.get('dt_model.pkl')
             new_dt = pickle.loads(download.read())
 
@@ -172,57 +169,48 @@ def main():
 
 
         with PutTab:
-            # Count the wins/loses
-            count_win = 0
-            count_lose = 0
-            wins = []
-            loses = []
-            both = [0]
 
-            putInputExpander = st.expander('Expand to see inputs')
-            with putInputExpander:
+            download = spy_models.get('dt_model.pkl')
+            new_dt = pickle.loads(download.read())
 
-                momentumInput = st.slider('Choose Momentum Threshold', -30, 0, value=-10)
-                spInput = st.slider('Choose Slow Pressure Threshold', -50, 0, value=0)
-                fpInput = st.slider('Choose Fast Pressure Threshold', -200, 0, value=-50)
-                winInput = st.slider('Choose a Win Threshold', -1.0, 0.0, step=0.1, value=-0.5)
-
-            for i in range((len(db_df)-1)):
-                if db_df.loc[i, 'm_delta'] < momentumInput and db_df.loc[i, 'sp_delta'] < spInput and \
-                        db_df.loc[i, 'fp_delta'] < fpInput:
-
-                    if db_df.loc[i + 1, 'change'] < winInput:
-                        count_win += 1
-                        wins.append(db_df.loc[i + 1, 'change'])
-                        both.append(1)
-                    else:
-                        count_lose += 1
-                        loses.append(db_df.loc[i + 1, 'change'])
-                        both.append(0)
-                else:
-                    both.append(0)
-
-            db_df['w_or_l'] = both
-
-            if count_win + count_lose > 0:
-                winPercentage = count_win / (count_win + count_lose)*100
+            predictor_df = pd.DataFrame(
+                db_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'key', 'w_or_l'])).values
+            st.write(predictor_df)
+            if new_dt.predict(predictor_df.T) == 1:
+                st.write("ML Says Buy")
             else:
-                winPercentage = 1
+                st.write("ML Says Wait")
 
-            st.write('CountWin: ', count_win, np.mean(wins))
-            st.write('CountLose:', count_lose, np.mean(loses))
-            st.write('Win Percent: ', winPercentage, '%')
+            st.write(results_df)
 
-            lastRow = db_df.tail(1)
-            prediction = lastRow['w_or_l'].iloc[0]
+            # for i in range((len(db_df)-1)):
+            #     if db_df.loc[i, 'm_delta'] < momentumInput and db_df.loc[i, 'sp_delta'] < spInput and \
+            #             db_df.loc[i, 'fp_delta'] < fpInput:
+            #
+            #         if db_df.loc[i + 1, 'change'] < winInput:
+            #             count_win += 1
+            #             wins.append(db_df.loc[i + 1, 'change'])
+            #             both.append(1)
+            #         else:
+            #             count_lose += 1
+            #             loses.append(db_df.loc[i + 1, 'change'])
+            #             both.append(0)
+            #     else:
+            #         both.append(0)
 
-            st.write(lastRow)
 
-            if lastRow['m_delta'].iloc[0] < momentumInput and lastRow['sp_delta'].iloc[0] < spInput and \
-                        lastRow['fp_delta'].iloc[0] < fpInput:
-                st.metric(label="BUY", value=lastRow['close'].iloc[0], delta="-PUT")
-            else:
-                st.error('WAIT!')
+
+          #  db_df['w_or_l'] = both
+
+            # if count_win + count_lose > 0:
+            #     winPercentage = count_win / (count_win + count_lose)*100
+            # else:
+            #     winPercentage = 1
+
+            # st.write('CountWin: ', count_win, np.mean(wins))
+            # st.write('CountLose:', count_lose, np.mean(loses))
+            # st.write('Win Percent: ', winPercentage, '%')
+
 
     return
 
