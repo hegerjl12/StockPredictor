@@ -5,6 +5,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from deta import Deta
+import pickle
 
 def main():
     st.set_page_config(
@@ -14,6 +15,7 @@ def main():
 
     deta = Deta(st.secrets['DB_TOKEN'])
     spy_db = deta.Base('spy_db')
+    spy_models = deta.Drive('spy_models')
 
     newDataTab, modelsTab, predictorTab = st.tabs(['Upload Data', 'Train and Save Models', 'Predictions'])
 
@@ -42,6 +44,7 @@ def main():
             'Choose to use High or Close for Calc',
             key='calc_value',
             options=['high', 'low', 'close'],
+            index=2,
         )
 
     with predictorTab:
@@ -144,6 +147,8 @@ def main():
             st.write("Accuracy: ", accy)
 
             results_df = pd.DataFrame({'pred': y_pred, 'actual':y_test})
+
+            spy_models.put(pickle.dumps(dt))
 
 
             predictor_df = pd.DataFrame(db_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'key', 'w_or_l'])).values
