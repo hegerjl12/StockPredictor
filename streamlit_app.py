@@ -223,10 +223,11 @@ def main():
         #    db_df = pd.DataFrame(allItems)
 
             pred_date = st.date_input('Choose Date', datetime.date.today())
-            pred_time = st.time_input('Choose Candle', datetime.time(6,30), step=1800)
+            pred_time = st.time_input('Choose Candle', datetime.time(7,30), step=1800)
             candle_string = str(pred_date) + 'T' + str(pred_time) + '-07:00'
-            #candle_string_prev = pred_date + 'T' +
-            st.write(candle_string)
+            td = datetime.timedelta(hours=1)
+            candle_string_prev = pred_date + 'T' + str(pred_time-td) + '-07:00'
+            st.write(candle_string_prev)
             db_df = spy_db.get(candle_string)
             st.write(db_df)
             #db_df['change'] = db_df[calcValue] - db_df['open']
