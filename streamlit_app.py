@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from deta import Deta
 import pickle
 
+
 def main():
     st.set_page_config(
         page_title="Stonkz Predictor",
@@ -208,6 +209,63 @@ def main():
         CallTab, PutTab = st.tabs(['Calls', 'Puts'])
 
         with CallTab:
+            calcValue = st.radio(
+                'Choose to use High or Close for Calc',
+                key='calc_value',
+                options=['high', 'low', 'close'],
+                index=2,
+            )
+
+            res = spy_db.fetch()
+            allItems = res.items
+
+            while res.last:
+                res = spy_db.fetch(last=res.last)
+                allItems += res.items
+
+            db_df = pd.DataFrame(allItems)
+
+            db_df['change'] = db_df[calcValue] - db_df['open']
+
+            # add column for the deltas for momentum, sp, fp
+            m_delta = [0]
+            sp_delta = [0]
+            fp_delta = [0]
+
+            for i in range(len(db_df['Momemtum'])):
+
+                if i < len(db_df['Momemtum']) - 1:
+                    m_delta.append(db_df.loc[i + 1, 'Momemtum'] - db_df.loc[i, 'Momemtum'])
+                    sp_delta.append(db_df.loc[i + 1, 'Slow Pressure'] - db_df.loc[i, 'Slow Pressure'])
+                    fp_delta.append(db_df.loc[i + 1, 'Fast Pressure'] - db_df.loc[i, 'Fast Pressure'])
+
+            db_df['m_delta'] = m_delta
+            db_df['sp_delta'] = sp_delta
+            db_df['fp_delta'] = fp_delta
+
+            # Count the wins/loses
+            count_win = 0
+            count_lose = 0
+            wins = []
+            loses = []
+            both = [0]
+
+            for i in range((len(db_df) - 1)):
+                if db_df.loc[i, 'm_delta'] > momentumInput and db_df.loc[i, 'sp_delta'] > spInput and db_df.loc[
+                    i, 'fp_delta'] > fpInput:
+                    # st.write(i+1, db_df.loc[i+1, 'change'])
+                    if db_df.loc[i + 1, 'change'] > winInput:
+                        count_win += 1
+                        wins.append(db_df.loc[i + 1, 'change'])
+                        both.append(1)
+                    else:
+                        count_lose += 1
+                        loses.append(db_df.loc[i + 1, 'change'])
+                        both.append(0)
+                else:
+                    both.append(-1)
+
+
 
             download = spy_models.get('dt_model.pkl')
             new_dt = pickle.loads(download.read())
@@ -221,6 +279,61 @@ def main():
 
 
         with PutTab:
+            calcValue = st.radio(
+                'Choose to use High or Close for Calc',
+                key='calc_value',
+                options=['high', 'low', 'close'],
+                index=2,
+            )
+
+            res = spy_db.fetch()
+            allItems = res.items
+
+            while res.last:
+                res = spy_db.fetch(last=res.last)
+                allItems += res.items
+
+            db_df = pd.DataFrame(allItems)
+
+            db_df['change'] = db_df[calcValue] - db_df['open']
+
+            # add column for the deltas for momentum, sp, fp
+            m_delta = [0]
+            sp_delta = [0]
+            fp_delta = [0]
+
+            for i in range(len(db_df['Momemtum'])):
+
+                if i < len(db_df['Momemtum']) - 1:
+                    m_delta.append(db_df.loc[i + 1, 'Momemtum'] - db_df.loc[i, 'Momemtum'])
+                    sp_delta.append(db_df.loc[i + 1, 'Slow Pressure'] - db_df.loc[i, 'Slow Pressure'])
+                    fp_delta.append(db_df.loc[i + 1, 'Fast Pressure'] - db_df.loc[i, 'Fast Pressure'])
+
+            db_df['m_delta'] = m_delta
+            db_df['sp_delta'] = sp_delta
+            db_df['fp_delta'] = fp_delta
+
+            # Count the wins/loses
+            count_win = 0
+            count_lose = 0
+            wins = []
+            loses = []
+            both = [0]
+
+            for i in range((len(db_df) - 1)):
+                if db_df.loc[i, 'm_delta'] < momentumInput and db_df.loc[i, 'sp_delta'] < spInput and \
+                        db_df.loc[i, 'fp_delta'] < fpInput:
+                    if db_df.loc[i + 1, 'change'] < winInput:
+                        count_win += 1
+                        wins.append(db_df.loc[i + 1, 'change'])
+                        both.append(1)
+                    else:
+                        count_lose += 1
+                        loses.append(db_df.loc[i + 1, 'change'])
+                        both.append(0)
+                else:
+                    both.append(0)
+
 
             download = spy_models.get('dt_model.pkl')
             new_dt = pickle.loads(download.read())
@@ -233,33 +346,6 @@ def main():
             else:
                 st.write("ML Says Wait")
 
-            # for i in range((len(db_df)-1)):
-            #     if db_df.loc[i, 'm_delta'] < momentumInput and db_df.loc[i, 'sp_delta'] < spInput and \
-            #             db_df.loc[i, 'fp_delta'] < fpInput:
-            #
-            #         if db_df.loc[i + 1, 'change'] < winInput:
-            #             count_win += 1
-            #             wins.append(db_df.loc[i + 1, 'change'])
-            #             both.append(1)
-            #         else:
-            #             count_lose += 1
-            #             loses.append(db_df.loc[i + 1, 'change'])
-            #             both.append(0)
-            #     else:
-            #         both.append(0)
-
-
-
-          #  db_df['w_or_l'] = both
-
-            # if count_win + count_lose > 0:
-            #     winPercentage = count_win / (count_win + count_lose)*100
-            # else:
-            #     winPercentage = 1
-
-            # st.write('CountWin: ', count_win, np.mean(wins))
-            # st.write('CountLose:', count_lose, np.mean(loses))
-            # st.write('Win Percent: ', winPercentage, '%')
 
 
     return
