@@ -68,7 +68,9 @@ def main():
 
             db_df = pd.DataFrame(allItems)
 
-            db_df['change'] = db_df[calcValue] - db_df['open']
+            db_df['change_close_open'] = db_df['close'] - db_df['open']
+            db_df['change_high_open'] = db_df['high'] - db_df['open']
+            db_df['change_low_open'] = db_df['low'] - db_df['open']
 
             # add column for the deltas for momentum, sp, fp
             m_delta = [0]
@@ -85,6 +87,11 @@ def main():
             db_df['m_delta'] = m_delta
             db_df['sp_delta'] = sp_delta
             db_df['fp_delta'] = fp_delta
+
+            for index, row in db_df.iterrows():
+                spy_db.put({'time': row['time'], 'open': row['open'], 'high': row['high'], 'low': row['low'],
+                            'close': row['close'], 'Momemtum': row['Momemtum'], 'Slow Pressure': row['Slow Pressure'],
+                            'Fast Pressure': row['Fast Pressure'], 'm_delta': row['m_delta'], 'sp_delta': row['sp_delta'], 'fp_delta': row['fp_delta'], 'change_close_open': row['change_close_open'], 'change_high_open': row['change_high_open'], 'change_low_open': row['change_low_open']}, key=row['time'])
 
             if calls_or_puts == 'Calls':
                 # Count the wins/loses
