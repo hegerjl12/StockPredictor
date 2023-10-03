@@ -239,20 +239,20 @@ def main():
             db_df = spy_db.get(candle_string)
             st.write(db_df)
 
+            if db_df is not None:
+                download = spy_models.get('call_dt_model.pkl')
+                new_dt = pickle.loads(download.read())
 
-            download = spy_models.get('call_dt_model.pkl')
-            new_dt = pickle.loads(download.read())
+                remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
+                for key in remove_list:
+                    del db_df[key]
 
-            remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
-            for key in remove_list:
-                del db_df[key]
-
-            predictor_df = pd.DataFrame(data=db_df, index=[0]).values
-            st.write(predictor_df)
-            if new_dt.predict(predictor_df) == 1:
-                st.write("ML Says Buy")
-            else:
-                st.write("ML Says Wait")
+                predictor_df = pd.DataFrame(data=db_df, index=[0]).values
+                st.write(predictor_df)
+                if new_dt.predict(predictor_df) == 1:
+                    st.write("ML Says Buy")
+                else:
+                    st.write("ML Says Wait")
 
 
         with PutTab:
@@ -312,19 +312,20 @@ def main():
             db_df = spy_db.get(candle_string)
             st.write(db_df)
 
-            download = spy_models.get('put_dt_model.pkl')
-            new_dt = pickle.loads(download.read())
+            if db_df is not None:
+                download = spy_models.get('put_dt_model.pkl')
+                new_dt = pickle.loads(download.read())
 
-            remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
-            for key in remove_list:
-                del db_df[key]
+                remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
+                for key in remove_list:
+                    del db_df[key]
 
-            predictor_df = pd.DataFrame(data=db_df, index=[0]).values
-            st.write(predictor_df)
-            if new_dt.predict(predictor_df) == 1:
-                st.write("ML Says Buy")
-            else:
-                st.write("ML Says Wait")
+                predictor_df = pd.DataFrame(data=db_df, index=[0]).values
+                st.write(predictor_df)
+                if new_dt.predict(predictor_df) == 1:
+                    st.write("ML Says Buy")
+                else:
+                    st.write("ML Says Wait")
 
 
 
