@@ -214,12 +214,12 @@ def main():
         CallTab, PutTab = st.tabs(['Calls', 'Puts'])
 
         with CallTab:
-            calcValue = st.radio(
-                'Choose to use High or Close for Calc',
-                key='call_calc_value',
-                options=['high', 'low', 'close'],
-                index=2,
-            )
+            # calcValue = st.radio(
+            #     'Choose to use High or Close for Calc',
+            #     key='call_calc_value',
+            #     options=['high', 'low', 'close'],
+            #     index=2,
+            # )
 
            # res = spy_db.fetch()
            # allItems = res.items
@@ -238,45 +238,28 @@ def main():
             st.write(candle_string)
             db_df = spy_db.get(candle_string)
             st.write(db_df)
-            #db_df['change'] = db_df[calcValue] - db_df['open']
 
-            # add column for the deltas for momentum, sp, fp
-            # m_delta = [0]
-            # sp_delta = [0]
-            # fp_delta = [0]
-            #
-            # for i in range(len(db_df['Momemtum'])):
-            #
-            #     if i < len(db_df['Momemtum']) - 1:
-            #         m_delta.append(db_df.loc[i + 1, 'Momemtum'] - db_df.loc[i, 'Momemtum'])
-            #         sp_delta.append(db_df.loc[i + 1, 'Slow Pressure'] - db_df.loc[i, 'Slow Pressure'])
-            #         fp_delta.append(db_df.loc[i + 1, 'Fast Pressure'] - db_df.loc[i, 'Fast Pressure'])
-            #
-            # db_df['m_delta'] = m_delta
-            # db_df['sp_delta'] = sp_delta
-            # db_df['fp_delta'] = fp_delta
-            #
-            #
-            # download = spy_models.get('dt_model.pkl')
-            # new_dt = pickle.loads(download.read())
-            #
-            # predictor_df = pd.DataFrame(db_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'key'])).values
-            # st.write(predictor_df)
-            # if new_dt.predict(predictor_df.T) == 1:
-            #     st.write("ML Says Buy")
-            # else:
-            #     st.write("ML Says Wait")
+
+            download = spy_models.get('call_dt_model.pkl')
+            new_dt = pickle.loads(download.read())
+
+            predictor_df = pd.DataFrame(db_df.drop(['time', 'open', 'high', 'low', 'close', 'key'])).values
+            st.write(predictor_df)
+            if new_dt.predict(predictor_df.T) == 1:
+                st.write("ML Says Buy")
+            else:
+                st.write("ML Says Wait")
 
 
         with PutTab:
-            st.write("placeholder")
+
             # calcValue = st.radio(
             #     'Choose to use High or Close for Calc',
             #     key='put_calc_value',
             #     options=['high', 'low', 'close'],
             #     index=2,
             # )
-            #
+
             # res = spy_db.fetch()
             # allItems = res.items
             #
@@ -315,6 +298,25 @@ def main():
             #     st.write("ML Says Buy")
             # else:
             #     st.write("ML Says Wait")
+
+            pred_date = st.date_input('Choose Date', datetime.date.today())
+            pred_time = st.time_input('Choose Candle', datetime.time(7, 30), step=1800)
+            candle_string = str(pred_date) + 'T' + str(pred_time) + '-07:00'
+            # td = datetime.timedelta(hours=1)
+            # candle_string_prev = str(pred_date) + 'T' + str(pred_time-td) + '-07:00'
+            st.write(candle_string)
+            db_df = spy_db.get(candle_string)
+            st.write(db_df)
+
+            download = spy_models.get('put_dt_model.pkl')
+            new_dt = pickle.loads(download.read())
+
+            predictor_df = pd.DataFrame(db_df.drop(['time', 'open', 'high', 'low', 'close', 'key'])).values
+            st.write(predictor_df)
+            if new_dt.predict(predictor_df.T) == 1:
+                st.write("ML Says Buy")
+            else:
+                st.write("ML Says Wait")
 
 
 
