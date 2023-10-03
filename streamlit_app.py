@@ -78,9 +78,9 @@ def main():
             options=['Calls', 'Puts'],
         )
 
-        momentumInput = st.slider('Choose Momentum Threshold', -30, 30, value=0)
-        spInput = st.slider('Choose Slow Pressure Threshold', -50, 50, value=0)
-        fpInput = st.slider('Choose Fast Pressure Threshold', -200, 200, value=0)
+        # momentumInput = st.slider('Choose Momentum Threshold', -30, 30, value=0)
+        # spInput = st.slider('Choose Slow Pressure Threshold', -50, 50, value=0)
+        # fpInput = st.slider('Choose Fast Pressure Threshold', -200, 200, value=0)
         winInput = st.slider('Choose a Win Threshold', 0.0, 1.0, step=0.1, value=0.5)
 
         if st.button('Generate Model'):
@@ -155,23 +155,23 @@ def main():
                 count_lose = 0
                 wins = []
                 loses = []
-                both = [0]
+                w_or_l = [0]
 
                 for i in range((len(db_df)-1)):
-                     if db_df.loc[i, 'm_delta'] < momentumInput and db_df.loc[i, 'sp_delta'] < spInput and \
-                             db_df.loc[i, 'fp_delta'] < fpInput:
-                         if db_df.loc[i + 1, 'change_close_open'] < winInput:
-                             count_win += 1
-                             wins.append(db_df.loc[i + 1, 'change_close_open'])
-                             both.append(1)
-                         else:
-                             count_lose += 1
-                             loses.append(db_df.loc[i + 1, 'change_close_open'])
-                             both.append(0)
+                     # if db_df.loc[i, 'm_delta'] < momentumInput and db_df.loc[i, 'sp_delta'] < spInput and \
+                     #         db_df.loc[i, 'fp_delta'] < fpInput:
+                     if db_df.loc[i + 1, 'change_close_open'] < winInput:
+                         count_win += 1
+                         wins.append(db_df.loc[i + 1, 'change_close_open'])
+                         w_or_l.append(1)
                      else:
-                         both.append(0)
+                         count_lose += 1
+                         loses.append(db_df.loc[i + 1, 'change_close_open'])
+                         w_or_l.append(0)
+                     # else:
+                     #     both.append(0)
 
-                db_df['w_or_l'] = both
+                db_df['w_or_l'] = w_or_l
 
                 if count_win + count_lose > 0:
                     winPercentage = count_win / (count_win + count_lose)*100
@@ -182,9 +182,9 @@ def main():
                 st.write('CountLose:', count_lose, np.mean(loses))
                 st.write('Win Percent: ', winPercentage, '%')
 
-                X_feed = db_df[db_df['w_or_l'] >= 0]
-                X = X_feed.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key'], axis=1).values
-                y = X_feed['w_or_l'].values
+                #X_feed = db_df[db_df['w_or_l'] >= 0]
+                X = db_df.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key'], axis=1).values
+                y = db_df['w_or_l'].values
 
                 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
 
