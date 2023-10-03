@@ -32,20 +32,45 @@ def main():
             spy_df = newData_df[
                 ['time', 'open', 'high', 'low', 'close', 'Momemtum', 'Slow Pressure', 'Fast Pressure']].copy()
 
+            spy_df['change_close_open'] = spy_df['close'] - spy_df['open']
+            spy_df['change_high_open'] = spy_df['high'] - spy_df['open']
+            spy_df['change_low_open'] = spy_df['low'] - spy_df['open']
+
+            # add column for the deltas for momentum, sp, fp
+            m_delta = [0]
+            sp_delta = [0]
+            fp_delta = [0]
+
+            for i in range(len(spy_df['Momemtum'])):
+
+                if i < len(spy_df['Momemtum']) - 1:
+                    m_delta.append(spy_df.loc[i + 1, 'Momemtum'] - spy_df.loc[i, 'Momemtum'])
+                    sp_delta.append(spy_df.loc[i + 1, 'Slow Pressure'] - spy_df.loc[i, 'Slow Pressure'])
+                    fp_delta.append(spy_df.loc[i + 1, 'Fast Pressure'] - spy_df.loc[i, 'Fast Pressure'])
+
+            spy_df['m_delta'] = m_delta
+            spy_df['sp_delta'] = sp_delta
+            spy_df['fp_delta'] = fp_delta
+
+            spy_df.drop(index=spy_df.index[0], axis=0, inplace=True)
+
             # Add the rows to the DB
             for index, row in spy_df.iterrows():
                 spy_db.put({'time': row['time'], 'open': row['open'], 'high': row['high'], 'low': row['low'],
                             'close': row['close'], 'Momemtum': row['Momemtum'], 'Slow Pressure': row['Slow Pressure'],
-                            'Fast Pressure': row['Fast Pressure']}, key=row['time'])
+                            'Fast Pressure': row['Fast Pressure'], 'm_delta': row['m_delta'],
+                            'sp_delta': row['sp_delta'], 'fp_delta': row['fp_delta'],
+                            'change_close_open': row['change_close_open'], 'change_high_open': row['change_high_open'],
+                            'change_low_open': row['change_low_open']}, key=row['time'])
 
     with modelsTab:
         # Choose to use the high or the close for the calculation of change
-        calcValue = st.radio(
-            'Choose to use High or Close for Calc',
-            key='calc_value',
-            options=['high', 'low', 'close'],
-            index=2,
-        )
+        # calcValue = st.radio(
+        #     'Choose to use High or Close for Calc',
+        #     key='calc_value',
+        #     options=['high', 'low', 'close'],
+        #     index=2,
+        # )
 
         calls_or_puts = st.radio(
             'Choose to build a model for calls or puts',
@@ -68,30 +93,6 @@ def main():
 
             db_df = pd.DataFrame(allItems)
 
-            db_df['change_close_open'] = db_df['close'] - db_df['open']
-            db_df['change_high_open'] = db_df['high'] - db_df['open']
-            db_df['change_low_open'] = db_df['low'] - db_df['open']
-
-            # add column for the deltas for momentum, sp, fp
-            m_delta = [0]
-            sp_delta = [0]
-            fp_delta = [0]
-
-            for i in range(len(db_df['Momemtum'])):
-
-                if i < len(db_df['Momemtum']) - 1:
-                    m_delta.append(db_df.loc[i + 1, 'Momemtum'] - db_df.loc[i, 'Momemtum'])
-                    sp_delta.append(db_df.loc[i + 1, 'Slow Pressure'] - db_df.loc[i, 'Slow Pressure'])
-                    fp_delta.append(db_df.loc[i + 1, 'Fast Pressure'] - db_df.loc[i, 'Fast Pressure'])
-
-            db_df['m_delta'] = m_delta
-            db_df['sp_delta'] = sp_delta
-            db_df['fp_delta'] = fp_delta
-
-            for index, row in db_df.iterrows():
-                spy_db.put({'time': row['time'], 'open': row['open'], 'high': row['high'], 'low': row['low'],
-                            'close': row['close'], 'Momemtum': row['Momemtum'], 'Slow Pressure': row['Slow Pressure'],
-                            'Fast Pressure': row['Fast Pressure'], 'm_delta': row['m_delta'], 'sp_delta': row['sp_delta'], 'fp_delta': row['fp_delta'], 'change_close_open': row['change_close_open'], 'change_high_open': row['change_high_open'], 'change_low_open': row['change_low_open']}, key=row['time'])
 
             if calls_or_puts == 'Calls':
                 # Count the wins/loses
@@ -99,24 +100,24 @@ def main():
                 count_lose = 0
                 wins = []
                 loses = []
-                both = [0]
+                w_or_l = [0]
 
                 for i in range((len(db_df) - 1)):
-                    if db_df.loc[i, 'm_delta'] > momentumInput and db_df.loc[i, 'sp_delta'] > spInput and db_df.loc[
-                        i, 'fp_delta'] > fpInput:
+                    # if db_df.loc[i, 'm_delta'] > momentumInput and db_df.loc[i, 'sp_delta'] > spInput and db_df.loc[
+                    #     i, 'fp_delta'] > fpInput:
                         # st.write(i+1, db_df.loc[i+1, 'change'])
-                        if db_df.loc[i + 1, 'change'] > winInput:
-                            count_win += 1
-                            wins.append(db_df.loc[i + 1, 'change'])
-                            both.append(1)
-                        else:
-                            count_lose += 1
-                            loses.append(db_df.loc[i + 1, 'change'])
-                            both.append(0)
+                    if db_df.loc[i + 1, 'change_close_open'] > winInput:
+                        count_win += 1
+                        wins.append(db_df.loc[i + 1, 'change_close_open'])
+                        w_or_l.append(1)
                     else:
-                        both.append(-1)
+                        count_lose += 1
+                        loses.append(db_df.loc[i + 1, 'change_close_open'])
+                        w_or_l.append(0)
+                    # else:
+                    #     both.append(-1)
 
-                db_df['w_or_l'] = both
+                db_df['w_or_l'] = w_or_l
 
                 if count_win + count_lose > 0:
                     winPercentage = count_win / (count_win + count_lose) * 100
@@ -127,9 +128,9 @@ def main():
                 st.write('CountLose:', count_lose, np.mean(loses))
                 st.write('Win Percent: ', winPercentage, '%')
 
-                X_feed = db_df[db_df['w_or_l'] >= 0]
-                X = X_feed.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key'], axis=1).values
-                y = X_feed['w_or_l'].values
+                #X_feed = db_df[db_df['w_or_l'] >= 0]
+                X = db_df.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key'], axis=1).values
+                y = db_df['w_or_l'].values
 
                 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
 
@@ -159,13 +160,13 @@ def main():
                 for i in range((len(db_df)-1)):
                      if db_df.loc[i, 'm_delta'] < momentumInput and db_df.loc[i, 'sp_delta'] < spInput and \
                              db_df.loc[i, 'fp_delta'] < fpInput:
-                         if db_df.loc[i + 1, 'change'] < winInput:
+                         if db_df.loc[i + 1, 'change_close_open'] < winInput:
                              count_win += 1
-                             wins.append(db_df.loc[i + 1, 'change'])
+                             wins.append(db_df.loc[i + 1, 'change_close_open'])
                              both.append(1)
                          else:
                              count_lose += 1
-                             loses.append(db_df.loc[i + 1, 'change'])
+                             loses.append(db_df.loc[i + 1, 'change_close_open'])
                              both.append(0)
                      else:
                          both.append(0)
