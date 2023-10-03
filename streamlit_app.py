@@ -247,7 +247,7 @@ def main():
             for key in remove_list:
                 del db_df[key]
 
-            predictor_df = pd.DataFrame(db_df).values
+            predictor_df = pd.DataFrame(data=db_df, index=[0]).values
             st.write(predictor_df)
             if new_dt.predict(predictor_df.T) == 1:
                 st.write("ML Says Buy")
@@ -319,7 +319,7 @@ def main():
             for key in remove_list:
                 del db_df[key]
 
-            predictor_df = pd.DataFrame(db_df).values
+            predictor_df = pd.DataFrame(data=db_df, index=[0]).values
             st.write(predictor_df)
             if new_dt.predict(predictor_df.T) == 1:
                 st.write("ML Says Buy")
