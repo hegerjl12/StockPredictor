@@ -81,7 +81,7 @@ def main():
         # momentumInput = st.slider('Choose Momentum Threshold', -30, 30, value=0)
         # spInput = st.slider('Choose Slow Pressure Threshold', -50, 50, value=0)
         # fpInput = st.slider('Choose Fast Pressure Threshold', -200, 200, value=0)
-        winInput = st.slider('Choose a Win Threshold', 0.0, 1.0, step=0.1, value=0.5)
+        winInput = st.slider('Choose a Win Threshold', -1.0, 1.0, step=0.1, value=0.5)
 
         if st.button('Generate Model'):
             res = spy_db.fetch()
