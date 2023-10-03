@@ -230,7 +230,7 @@ def main():
 
         #    db_df = pd.DataFrame(allItems)
 
-            pred_date = st.date_input('Choose Date', datetime.date.today(), kye='call_date')
+            pred_date = st.date_input('Choose Date', datetime.date.today(), key='call_date')
             pred_time = st.time_input('Choose Candle', datetime.time(7,30), step=1800, key='call_time')
             candle_string = str(pred_date) + 'T' + str(pred_time) + '-07:00'
             #td = datetime.timedelta(hours=1)
