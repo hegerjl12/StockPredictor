@@ -113,13 +113,6 @@ def main():
             #                 'change_low_open': row['change_low_open']}, key=row['time'])
 
     with modelsTab:
-        # Choose to use the high or the close for the calculation of change
-        # calcValue = st.radio(
-        #     'Choose to use High or Close for Calc',
-        #     key='calc_value',
-        #     options=['high', 'low', 'close'],
-        #     index=2,
-        # )
 
         calls_or_puts = st.radio(
             'Choose to build a model for calls or puts',
@@ -127,9 +120,6 @@ def main():
             options=['Calls', 'Puts'],
         )
 
-        # momentumInput = st.slider('Choose Momentum Threshold', -30, 30, value=0)
-        # spInput = st.slider('Choose Slow Pressure Threshold', -50, 50, value=0)
-        # fpInput = st.slider('Choose Fast Pressure Threshold', -200, 200, value=0)
         winInput = st.slider('Choose a Win Threshold', -1.0, 1.0, step=0.1, value=0.5)
 
         if st.button('Generate Model'):
@@ -144,11 +134,8 @@ def main():
 
 
             if calls_or_puts == 'Calls':
-                # Count the wins/loses
-                count_win = 0
-                count_lose = 0
-                wins = []
-                loses = []
+
+                wins_drawdown = []
                 w_or_l = [0]
 
                 for i in range((len(db_df) - 1)):
@@ -156,26 +143,15 @@ def main():
                     #     i, 'fp_delta'] > fpInput:
                         # st.write(i+1, db_df.loc[i+1, 'change'])
                     if db_df.loc[i + 1, 'change_close_open'] > winInput:
-                        count_win += 1
-                        wins.append(db_df.loc[i + 1, 'change_close_open'])
+                        wins_drawdown.append(db_df.loc[i + 1, 'change_low_open'])
                         w_or_l.append(1)
                     else:
-                        count_lose += 1
-                        loses.append(db_df.loc[i + 1, 'change_close_open'])
                         w_or_l.append(0)
-                    # else:
-                    #     both.append(-1)
+
+                st.write("Average Drawdown on wins: ", np.average(wins_drawdown))
 
                 db_df['w_or_l'] = w_or_l
 
-                if count_win + count_lose > 0:
-                    winPercentage = count_win / (count_win + count_lose) * 100
-                else:
-                    winPercentage = 1
-
-                st.write('CountWin: ', count_win, np.mean(wins))
-                st.write('CountLose:', count_lose, np.mean(loses))
-                st.write('Win Percent: ', winPercentage, '%')
 
                 #X_feed = db_df[db_df['w_or_l'] >= 0]
                 X = db_df.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key'], axis=1).values
