@@ -121,6 +121,7 @@ def main():
         )
 
         winInput = st.slider('Choose a Win Threshold', -1.0, 1.0, step=0.1, value=0.5)
+        drawdownInput = st.slider('Choose a Drawdown Threshold', -0.5, 0, step=0.1, value=-0.4)
 
         if st.button('Generate Model'):
             res = spy_db.fetch()
@@ -142,7 +143,7 @@ def main():
                     # if db_df.loc[i, 'm_delta'] > momentumInput and db_df.loc[i, 'sp_delta'] > spInput and db_df.loc[
                     #     i, 'fp_delta'] > fpInput:
                         # st.write(i+1, db_df.loc[i+1, 'change'])
-                    if db_df.loc[i + 1, 'change_close_open'] > winInput:
+                    if db_df.loc[i + 1, 'change_close_open'] > winInput and db_df.loc[i + 1, 'change_low_open'] > drawdownInput:
                         wins_drawdown.append(db_df.loc[i + 1, 'change_low_open'])
                         w_or_l.append(1)
                     else:
