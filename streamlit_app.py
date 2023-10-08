@@ -148,7 +148,7 @@ def main():
                     else:
                         w_or_l.append(0)
 
-                st.write("Average Drawdown on wins: ", np.average(wins_drawdown))
+                st.write("Average Drawdown on ", len(wins_drawdown), ": ", np.average(wins_drawdown))
 
                 db_df['w_or_l'] = w_or_l
 
