@@ -55,6 +55,78 @@ def add_new_data_to_database(spy_db, spy_df):
                     'change_close_open': row['change_close_open'], 'change_high_open': row['change_high_open'],
                     'change_low_open': row['change_low_open']}, key=row['time'])
     return
+
+def create_call_model(db_df, winInput, drawdownInput):
+    wins_drawdown = []
+    w_or_l = [0]
+
+    for i in range((len(db_df) - 1)):
+        # if db_df.loc[i, 'm_delta'] > momentumInput and db_df.loc[i, 'sp_delta'] > spInput and db_df.loc[
+        #     i, 'fp_delta'] > fpInput:
+        # st.write(i+1, db_df.loc[i+1, 'change'])
+        if db_df.loc[i + 1, 'change_close_open'] > winInput and db_df.loc[i + 1, 'change_low_open'] > drawdownInput:
+            wins_drawdown.append(db_df.loc[i + 1, 'change_low_open'])
+            w_or_l.append(1)
+        else:
+            w_or_l.append(0)
+
+    st.write("Average Drawdown on ", len(wins_drawdown), ": ", np.average(wins_drawdown))
+
+    db_df['w_or_l'] = w_or_l
+
+    # X_feed = db_df[db_df['w_or_l'] >= 0]
+    X = db_df.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key'], axis=1).values
+    y = db_df['w_or_l'].values
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
+
+    dt = DecisionTreeClassifier(max_depth=2, random_state=12)
+    dt.fit(X_train, y_train)
+
+    y_pred = dt.predict(X_test)
+    accy = accuracy_score(y_test, y_pred)
+
+    st.write("Accuracy: ", accy)
+
+    results_df = pd.DataFrame({'pred': y_pred, 'actual': y_test})
+
+    return dt
+
+def create_put_model(db_df, winInput, drawdownInput):
+    wins_drawdown = []
+    w_or_l = [0]
+
+    for i in range((len(db_df) - 1)):
+        # if db_df.loc[i, 'm_delta'] < momentumInput and db_df.loc[i, 'sp_delta'] < spInput and \
+        #         db_df.loc[i, 'fp_delta'] < fpInput:
+        if db_df.loc[i + 1, 'change_close_open'] < winInput and db_df.loc[i + 1, 'change_high_open'] < drawdownInput:
+            wins_drawdown.append(db_df.loc[i + 1, 'change_high_open'])
+            w_or_l.append(1)
+        else:
+            w_or_l.append(0)
+
+    st.write("Average Drawdown on ", len(wins_drawdown), ": ", np.average(wins_drawdown))
+
+    db_df['w_or_l'] = w_or_l
+
+    # X_feed = db_df[db_df['w_or_l'] >= 0]
+    X = db_df.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key'], axis=1).values
+    y = db_df['w_or_l'].values
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
+
+    dt = DecisionTreeClassifier(max_depth=2, random_state=12)
+    dt.fit(X_train, y_train)
+
+    y_pred = dt.predict(X_test)
+    accy = accuracy_score(y_test, y_pred)
+
+    st.write("Accuracy: ", accy)
+
+    results_df = pd.DataFrame({'pred': y_pred, 'actual': y_test})
+
+    return dt
+
 def main():
     st.set_page_config(
         page_title="Stonkz Predictor",
@@ -136,81 +208,85 @@ def main():
 
             if calls_or_puts == 'Calls':
 
-                wins_drawdown = []
-                w_or_l = [0]
+                # wins_drawdown = []
+                # w_or_l = [0]
+                #
+                # for i in range((len(db_df) - 1)):
+                #     # if db_df.loc[i, 'm_delta'] > momentumInput and db_df.loc[i, 'sp_delta'] > spInput and db_df.loc[
+                #     #     i, 'fp_delta'] > fpInput:
+                #         # st.write(i+1, db_df.loc[i+1, 'change'])
+                #     if db_df.loc[i + 1, 'change_close_open'] > winInput and db_df.loc[i + 1, 'change_low_open'] > drawdownInput:
+                #         wins_drawdown.append(db_df.loc[i + 1, 'change_low_open'])
+                #         w_or_l.append(1)
+                #     else:
+                #         w_or_l.append(0)
+                #
+                # st.write("Average Drawdown on ", len(wins_drawdown), ": ", np.average(wins_drawdown))
+                #
+                # db_df['w_or_l'] = w_or_l
+                #
+                #
+                # #X_feed = db_df[db_df['w_or_l'] >= 0]
+                # X = db_df.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key'], axis=1).values
+                # y = db_df['w_or_l'].values
+                #
+                # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
+                #
+                # dt = DecisionTreeClassifier(max_depth=2, random_state=12)
+                # dt.fit(X_train, y_train)
+                #
+                # y_pred = dt.predict(X_test)
+                # accy = accuracy_score(y_test, y_pred)
+                #
+                # st.write("Accuracy: ", accy)
+                #
+                # results_df = pd.DataFrame({'pred': y_pred, 'actual': y_test})
 
-                for i in range((len(db_df) - 1)):
-                    # if db_df.loc[i, 'm_delta'] > momentumInput and db_df.loc[i, 'sp_delta'] > spInput and db_df.loc[
-                    #     i, 'fp_delta'] > fpInput:
-                        # st.write(i+1, db_df.loc[i+1, 'change'])
-                    if db_df.loc[i + 1, 'change_close_open'] > winInput and db_df.loc[i + 1, 'change_low_open'] > drawdownInput:
-                        wins_drawdown.append(db_df.loc[i + 1, 'change_low_open'])
-                        w_or_l.append(1)
-                    else:
-                        w_or_l.append(0)
-
-                st.write("Average Drawdown on ", len(wins_drawdown), ": ", np.average(wins_drawdown))
-
-                db_df['w_or_l'] = w_or_l
-
-
-                #X_feed = db_df[db_df['w_or_l'] >= 0]
-                X = db_df.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key'], axis=1).values
-                y = db_df['w_or_l'].values
-
-                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
-
-                dt = DecisionTreeClassifier(max_depth=2, random_state=12)
-                dt.fit(X_train, y_train)
-
-                y_pred = dt.predict(X_test)
-                accy = accuracy_score(y_test, y_pred)
-
-                st.write("Accuracy: ", accy)
-
-                results_df = pd.DataFrame({'pred': y_pred, 'actual': y_test})
+                dt = create_call_model(db_df, winInput, drawdownInput)
 
                 st.download_button(
                     "Download Model",
                     data=pickle.dumps(dt),
                     file_name="dt_model.pkl",
                 )
+
             if calls_or_puts == 'Puts':
 
-                wins_drawdown = []
-                w_or_l = [0]
-
-                for i in range((len(db_df)-1)):
-                     # if db_df.loc[i, 'm_delta'] < momentumInput and db_df.loc[i, 'sp_delta'] < spInput and \
-                     #         db_df.loc[i, 'fp_delta'] < fpInput:
-                     if db_df.loc[i + 1, 'change_close_open'] < winInput and db_df.loc[i + 1, 'change_high_open'] < drawdownInput:
-                         wins_drawdown.append(db_df.loc[i + 1, 'change_high_open'])
-                         w_or_l.append(1)
-                     else:
-                         w_or_l.append(0)
-                     # else:
-                     #     both.append(0)
-
-                st.write("Average Drawdown on ", len(wins_drawdown), ": ", np.average(wins_drawdown))
-
-                db_df['w_or_l'] = w_or_l
-
-
-                #X_feed = db_df[db_df['w_or_l'] >= 0]
-                X = db_df.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key'], axis=1).values
-                y = db_df['w_or_l'].values
-
-                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
-
-                dt = DecisionTreeClassifier(max_depth=2, random_state=12)
-                dt.fit(X_train, y_train)
-
-                y_pred = dt.predict(X_test)
-                accy = accuracy_score(y_test, y_pred)
-
-                st.write("Accuracy: ", accy)
-
-                results_df = pd.DataFrame({'pred': y_pred, 'actual': y_test})
+                # wins_drawdown = []
+                # w_or_l = [0]
+                #
+                # for i in range((len(db_df)-1)):
+                #      # if db_df.loc[i, 'm_delta'] < momentumInput and db_df.loc[i, 'sp_delta'] < spInput and \
+                #      #         db_df.loc[i, 'fp_delta'] < fpInput:
+                #      if db_df.loc[i + 1, 'change_close_open'] < winInput and db_df.loc[i + 1, 'change_high_open'] < drawdownInput:
+                #          wins_drawdown.append(db_df.loc[i + 1, 'change_high_open'])
+                #          w_or_l.append(1)
+                #      else:
+                #          w_or_l.append(0)
+                #      # else:
+                #      #     both.append(0)
+                #
+                # st.write("Average Drawdown on ", len(wins_drawdown), ": ", np.average(wins_drawdown))
+                #
+                # db_df['w_or_l'] = w_or_l
+                #
+                #
+                # #X_feed = db_df[db_df['w_or_l'] >= 0]
+                # X = db_df.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key'], axis=1).values
+                # y = db_df['w_or_l'].values
+                #
+                # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
+                #
+                # dt = DecisionTreeClassifier(max_depth=2, random_state=12)
+                # dt.fit(X_train, y_train)
+                #
+                # y_pred = dt.predict(X_test)
+                # accy = accuracy_score(y_test, y_pred)
+                #
+                # st.write("Accuracy: ", accy)
+                #
+                # results_df = pd.DataFrame({'pred': y_pred, 'actual': y_test})
+                dt = create_put_model(db_df, winInput, drawdownInput)
 
                 st.download_button(
                     "Download Model",
