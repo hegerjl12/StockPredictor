@@ -319,24 +319,31 @@ def main():
             candle_string = str(pred_date) + 'T' + str(pred_time) + '-07:00'
             #td = datetime.timedelta(hours=1)
             #candle_string_prev = str(pred_date) + 'T' + str(pred_time-td) + '-07:00'
-            st.write(candle_string)
-            db_df = spy_db.get(candle_string)
-            st.write(db_df)
+            selected_candle_data = spy_db.get(candle_string)
+            st.write(selected_candle_data)
 
-            if db_df is not None:
+            if selected_candle_data is not None:
                 download = spy_models.get('call_dt_model.pkl')
+                download2 = spy_models.get('call_dt_model_70_30.pkl')
                 new_dt = pickle.loads(download.read())
+                new_dt2 = pickle.loads(download2.read())
 
                 remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
                 for key in remove_list:
-                    del db_df[key]
+                    del selected_candle_data[key]
 
-                predictor_df = pd.DataFrame(data=db_df, index=[0]).values
+                predictor_df = pd.DataFrame(data=selected_candle_data, index=[0]).values
                 st.write(predictor_df)
+
                 if new_dt.predict(predictor_df) == 1:
                     st.write("ML Says Buy")
                 else:
                     st.write("ML Says Wait")
+
+                if new_dt2.predict(predictor_df) == 1:
+                    st.write("ML 70/30 Says Buy")
+                else:
+                    st.write("ML 70/30 Says Wait")
 
 
         with PutTab:
@@ -398,19 +405,26 @@ def main():
 
             if db_df is not None:
                 download = spy_models.get('put_dt_model.pkl')
+                download2 = spy_models.get('put_dt_model.pkl')
                 new_dt = pickle.loads(download.read())
+                new_dt2 = pickle.loads(download2.read())
 
                 remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
                 for key in remove_list:
-                    del db_df[key]
+                    del selected_candle_data[key]
 
-                predictor_df = pd.DataFrame(data=db_df, index=[0]).values
+                predictor_df = pd.DataFrame(data=selected_candle_data, index=[0]).values
                 st.write(predictor_df)
+
                 if new_dt.predict(predictor_df) == 1:
                     st.write("ML Says Buy")
                 else:
                     st.write("ML Says Wait")
 
+                if new_dt2.predict(predictor_df) == 1:
+                    st.write("ML 70/30 Says Buy")
+                else:
+                    st.write("ML 70/30 Says Wait")
 
 
     return
