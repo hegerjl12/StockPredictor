@@ -9,17 +9,64 @@ import pickle
 import datetime
 
 
+def connect_database():
+    deta = Deta(st.secrets['DB_TOKEN'])
+    spy_db = deta.Base('spy_db')
+    spy_models = deta.Drive('spy_models')
+
+    return deta, spy_db, spy_models
+
+def process_data(spy_db, newData_df):
+    # trim the upload to just columns we care about
+    spy_df = newData_df[
+        ['time', 'open', 'high', 'low', 'close', 'Momemtum', 'Slow Pressure', 'Fast Pressure']].copy()
+
+    spy_df['change_close_open'] = spy_df['close'] - spy_df['open']
+    spy_df['change_high_open'] = spy_df['high'] - spy_df['open']
+    spy_df['change_low_open'] = spy_df['low'] - spy_df['open']
+
+    # add column for the deltas for momentum, sp, fp
+    m_delta = [0]
+    sp_delta = [0]
+    fp_delta = [0]
+
+    for i in range(len(spy_df['Momemtum'])):
+
+        if i < len(spy_df['Momemtum']) - 1:
+            m_delta.append(spy_df.loc[i + 1, 'Momemtum'] - spy_df.loc[i, 'Momemtum'])
+            sp_delta.append(spy_df.loc[i + 1, 'Slow Pressure'] - spy_df.loc[i, 'Slow Pressure'])
+            fp_delta.append(spy_df.loc[i + 1, 'Fast Pressure'] - spy_df.loc[i, 'Fast Pressure'])
+
+    spy_df['m_delta'] = m_delta
+    spy_df['sp_delta'] = sp_delta
+    spy_df['fp_delta'] = fp_delta
+
+    spy_df.drop(index=spy_df.index[0], axis=0, inplace=True)
+
+    return spy_df
+
+def add_new_data_to_database(spy_db, spy_df):
+    # Add the rows to the DB
+    for index, row in spy_df.iterrows():
+        spy_db.put({'time': row['time'], 'open': row['open'], 'high': row['high'], 'low': row['low'],
+                    'close': row['close'], 'Momemtum': row['Momemtum'], 'Slow Pressure': row['Slow Pressure'],
+                    'Fast Pressure': row['Fast Pressure'], 'm_delta': row['m_delta'],
+                    'sp_delta': row['sp_delta'], 'fp_delta': row['fp_delta'],
+                    'change_close_open': row['change_close_open'], 'change_high_open': row['change_high_open'],
+                    'change_low_open': row['change_low_open']}, key=row['time'])
+    return
 def main():
     st.set_page_config(
         page_title="Stonkz Predictor",
         page_icon="🤑",
         layout="wide",)
 
-    deta = Deta(st.secrets['DB_TOKEN'])
-    spy_db = deta.Base('spy_db')
-    spy_models = deta.Drive('spy_models')
-
     newDataTab, modelsTab, predictorTab = st.tabs(['Upload Data', 'Train and Save Models', 'Predictions'])
+
+    deta, spy_db, spy_models = connect_database()
+    # deta = Deta(st.secrets['DB_TOKEN'])
+    # spy_db = deta.Base('spy_db')
+    # spy_models = deta.Drive('spy_models')
 
     with newDataTab:
         # Upload a csv export file
@@ -28,40 +75,42 @@ def main():
         if fileUpload is not None:
             newData_df = pd.read_csv(fileUpload)
 
-            # trim the upload to just columns we care about
-            spy_df = newData_df[
-                ['time', 'open', 'high', 'low', 'close', 'Momemtum', 'Slow Pressure', 'Fast Pressure']].copy()
+            spy_df = process_data(spy_db, newData_df)
+            # # trim the upload to just columns we care about
+            # spy_df = newData_df[
+            #     ['time', 'open', 'high', 'low', 'close', 'Momemtum', 'Slow Pressure', 'Fast Pressure']].copy()
+            #
+            # spy_df['change_close_open'] = spy_df['close'] - spy_df['open']
+            # spy_df['change_high_open'] = spy_df['high'] - spy_df['open']
+            # spy_df['change_low_open'] = spy_df['low'] - spy_df['open']
+            #
+            # # add column for the deltas for momentum, sp, fp
+            # m_delta = [0]
+            # sp_delta = [0]
+            # fp_delta = [0]
+            #
+            # for i in range(len(spy_df['Momemtum'])):
+            #
+            #     if i < len(spy_df['Momemtum']) - 1:
+            #         m_delta.append(spy_df.loc[i + 1, 'Momemtum'] - spy_df.loc[i, 'Momemtum'])
+            #         sp_delta.append(spy_df.loc[i + 1, 'Slow Pressure'] - spy_df.loc[i, 'Slow Pressure'])
+            #         fp_delta.append(spy_df.loc[i + 1, 'Fast Pressure'] - spy_df.loc[i, 'Fast Pressure'])
+            #
+            # spy_df['m_delta'] = m_delta
+            # spy_df['sp_delta'] = sp_delta
+            # spy_df['fp_delta'] = fp_delta
+            #
+            # spy_df.drop(index=spy_df.index[0], axis=0, inplace=True)
 
-            spy_df['change_close_open'] = spy_df['close'] - spy_df['open']
-            spy_df['change_high_open'] = spy_df['high'] - spy_df['open']
-            spy_df['change_low_open'] = spy_df['low'] - spy_df['open']
-
-            # add column for the deltas for momentum, sp, fp
-            m_delta = [0]
-            sp_delta = [0]
-            fp_delta = [0]
-
-            for i in range(len(spy_df['Momemtum'])):
-
-                if i < len(spy_df['Momemtum']) - 1:
-                    m_delta.append(spy_df.loc[i + 1, 'Momemtum'] - spy_df.loc[i, 'Momemtum'])
-                    sp_delta.append(spy_df.loc[i + 1, 'Slow Pressure'] - spy_df.loc[i, 'Slow Pressure'])
-                    fp_delta.append(spy_df.loc[i + 1, 'Fast Pressure'] - spy_df.loc[i, 'Fast Pressure'])
-
-            spy_df['m_delta'] = m_delta
-            spy_df['sp_delta'] = sp_delta
-            spy_df['fp_delta'] = fp_delta
-
-            spy_df.drop(index=spy_df.index[0], axis=0, inplace=True)
-
-            # Add the rows to the DB
-            for index, row in spy_df.iterrows():
-                spy_db.put({'time': row['time'], 'open': row['open'], 'high': row['high'], 'low': row['low'],
-                            'close': row['close'], 'Momemtum': row['Momemtum'], 'Slow Pressure': row['Slow Pressure'],
-                            'Fast Pressure': row['Fast Pressure'], 'm_delta': row['m_delta'],
-                            'sp_delta': row['sp_delta'], 'fp_delta': row['fp_delta'],
-                            'change_close_open': row['change_close_open'], 'change_high_open': row['change_high_open'],
-                            'change_low_open': row['change_low_open']}, key=row['time'])
+            add_new_data_to_database(spy_db, spy_df)
+            # # Add the rows to the DB
+            # for index, row in spy_df.iterrows():
+            #     spy_db.put({'time': row['time'], 'open': row['open'], 'high': row['high'], 'low': row['low'],
+            #                 'close': row['close'], 'Momemtum': row['Momemtum'], 'Slow Pressure': row['Slow Pressure'],
+            #                 'Fast Pressure': row['Fast Pressure'], 'm_delta': row['m_delta'],
+            #                 'sp_delta': row['sp_delta'], 'fp_delta': row['fp_delta'],
+            #                 'change_close_open': row['change_close_open'], 'change_high_open': row['change_high_open'],
+            #                 'change_low_open': row['change_low_open']}, key=row['time'])
 
     with modelsTab:
         # Choose to use the high or the close for the calculation of change
