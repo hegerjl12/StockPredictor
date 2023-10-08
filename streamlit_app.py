@@ -121,7 +121,7 @@ def main():
         )
 
         winInput = st.slider('Choose a Win Threshold', -1.0, 1.0, step=0.1, value=0.5)
-        drawdownInput = st.slider('Choose a Drawdown Threshold', -0.5, 0.0, step=0.1, value=-0.4)
+        drawdownInput = st.slider('Choose a Drawdown Threshold', -0.5, 0.5, step=0.1, value=-0.4)
 
         if st.button('Generate Model'):
             res = spy_db.fetch()
@@ -176,37 +176,25 @@ def main():
                     file_name="dt_model.pkl",
                 )
             if calls_or_puts == 'Puts':
-                # Count the wins/loses
-                count_win = 0
-                count_lose = 0
-                wins = []
-                loses = []
+
+                wins_drawdown = []
                 w_or_l = [0]
 
                 for i in range((len(db_df)-1)):
                      # if db_df.loc[i, 'm_delta'] < momentumInput and db_df.loc[i, 'sp_delta'] < spInput and \
                      #         db_df.loc[i, 'fp_delta'] < fpInput:
-                     if db_df.loc[i + 1, 'change_close_open'] < winInput:
-                         count_win += 1
-                         wins.append(db_df.loc[i + 1, 'change_close_open'])
+                     if db_df.loc[i + 1, 'change_close_open'] < winInput and db_df.loc[i + 1, 'change_high_open'] < drawdownInput:
+                         wins_drawdown.append(db_df.loc[i + 1, 'change_high_open'])
                          w_or_l.append(1)
                      else:
-                         count_lose += 1
-                         loses.append(db_df.loc[i + 1, 'change_close_open'])
                          w_or_l.append(0)
                      # else:
                      #     both.append(0)
 
+                st.write("Average Drawdown on ", len(wins_drawdown), ": ", np.average(wins_drawdown))
+
                 db_df['w_or_l'] = w_or_l
 
-                if count_win + count_lose > 0:
-                    winPercentage = count_win / (count_win + count_lose)*100
-                else:
-                    winPercentage = 1
-
-                st.write('CountWin: ', count_win, np.mean(wins))
-                st.write('CountLose:', count_lose, np.mean(loses))
-                st.write('Win Percent: ', winPercentage, '%')
 
                 #X_feed = db_df[db_df['w_or_l'] >= 0]
                 X = db_df.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key'], axis=1).values
@@ -240,12 +228,6 @@ def main():
         CallTab, PutTab = st.tabs(['Calls', 'Puts'])
 
         with CallTab:
-            # calcValue = st.radio(
-            #     'Choose to use High or Close for Calc',
-            #     key='call_calc_value',
-            #     options=['high', 'low', 'close'],
-            #     index=2,
-            # )
 
            # res = spy_db.fetch()
            # allItems = res.items
