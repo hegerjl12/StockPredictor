@@ -121,7 +121,7 @@ def main():
         )
 
         winInput = st.slider('Choose a Win Threshold', -1.0, 1.0, step=0.1, value=0.5)
-        drawdownInput = st.slider('Choose a Drawdown Threshold', -0.5, 0, step=0.1, value=-0.4)
+        drawdownInput = st.slider('Choose a Drawdown Threshold', -0.5, 0.0, step=0.1, value=-0.4)
 
         if st.button('Generate Model'):
             res = spy_db.fetch()
