@@ -325,8 +325,10 @@ def main():
             if selected_candle_data is not None:
                 download = spy_models.get('call_dt_model.pkl')
                 download2 = spy_models.get('call_dt_model_70_30.pkl')
+                download3 = spy_models.get('call_dt_model_100_20.pkl')
                 new_dt = pickle.loads(download.read())
                 new_dt2 = pickle.loads(download2.read())
+                new_dt3 = pickle.loads(download3.read())
 
                 remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
                 for key in remove_list:
@@ -344,6 +346,11 @@ def main():
                     st.write("ML 70/30 Says Buy")
                 else:
                     st.write("ML 70/30 Says Wait")
+
+                if new_dt3.predict(predictor_df) == 1:
+                    st.write("ML 100/20 Says Buy")
+                else:
+                    st.write("ML 100/20 Says Wait")
 
 
         with PutTab:
@@ -405,9 +412,11 @@ def main():
 
             if db_df is not None:
                 download = spy_models.get('put_dt_model.pkl')
-                download2 = spy_models.get('put_dt_model.pkl')
+                download2 = spy_models.get('put_dt_model_70_30.pkl')
+                download3 = spy_models.get('put_dt_model_100_20.pkl')
                 new_dt = pickle.loads(download.read())
                 new_dt2 = pickle.loads(download2.read())
+                new_dt3 = pickle.loads(download3.read())
 
                 remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
                 for key in remove_list:
@@ -425,6 +434,11 @@ def main():
                     st.write("ML 70/30 Says Buy")
                 else:
                     st.write("ML 70/30 Says Wait")
+
+                if new_dt3.predict(predictor_df) == 1:
+                    st.write("ML 100/20 Says Buy")
+                else:
+                    st.write("ML 100/20 Says Wait")
 
 
     return
