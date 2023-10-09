@@ -128,7 +128,16 @@ def create_put_model(db_df, winInput, drawdownInput):
     return dt
 
 @st.cache
-def backup_database(db_df):
+def backup_database(spy_db):
+    res = spy_db.fetch()
+    allItems = res.items
+
+    while res.last:
+        res = spy_db.fetch(last=res.last)
+        allItems += res.items
+
+    db_df = pd.DataFrame(allItems)
+
     csv = db_df.to_csv().encode('utf-8')
 
     st.download_button(
@@ -156,7 +165,7 @@ def main():
         # Upload a csv export file
         fileUpload = st.file_uploader('Upload SPY 1 HR Chart Data', type='csv')
 
-        backup_database()
+        backup_database(spy_db)
 
         if fileUpload is not None:
             newData_df = pd.read_csv(fileUpload)
