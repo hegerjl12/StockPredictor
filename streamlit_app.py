@@ -421,9 +421,11 @@ def main():
                 download = spy_models.get('put_dt_model.pkl')
                 download2 = spy_models.get('put_dt_model_70_30.pkl')
                 download3 = spy_models.get('put_dt_model_100_20.pkl')
+                download4 = spy_models.get('put_dt_model_50_10.pkl')
                 new_dt = pickle.loads(download.read())
                 new_dt2 = pickle.loads(download2.read())
                 new_dt3 = pickle.loads(download3.read())
+                new_dt4 = pickle.loads(download4.read())
 
                 remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
                 for key in remove_list:
@@ -446,6 +448,11 @@ def main():
                     st.write("ML 100/20 Says Buy")
                 else:
                     st.write("ML 100/20 Says Wait")
+
+                if new_dt4.predict(predictor_df) == 1:
+                    st.write("ML 50/10 Says Buy")
+                else:
+                    st.write("ML 50/10 Says Wait")
 
 
     return
