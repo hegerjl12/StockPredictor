@@ -321,7 +321,7 @@ def main():
             #candle_string_prev = str(pred_date) + 'T' + str(pred_time-td) + '-07:00'
             selected_candle_data = spy_db.get(candle_string)
             st.write(selected_candle_data)
-            close_price = selected_candle_data['close']
+
 
             if selected_candle_data is not None:
                 download = spy_models.get('call_dt_model.pkl')
@@ -333,6 +333,7 @@ def main():
                 new_dt3 = pickle.loads(download3.read())
                 new_dt4 = pickle.loads(download4.read())
 
+                close_price = selected_candle_data['close']
                 remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
                 for key in remove_list:
                     del selected_candle_data[key]
@@ -417,7 +418,7 @@ def main():
             st.write(candle_string)
             selected_candle_data = spy_db.get(candle_string)
             st.write(selected_candle_data)
-            close_price = selected_candle_data['close']
+
 
             if selected_candle_data is not None:
                 download = spy_models.get('put_dt_model.pkl')
@@ -429,6 +430,7 @@ def main():
                 new_dt3 = pickle.loads(download3.read())
                 new_dt4 = pickle.loads(download4.read())
 
+                close_price = selected_candle_data['close']
                 remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
                 for key in remove_list:
                     del selected_candle_data[key]
