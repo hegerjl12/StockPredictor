@@ -145,23 +145,24 @@ def main():
         # Upload a csv export file
         fileUpload = st.file_uploader('Upload SPY 1 HR Chart Data', type='csv')
 
-        res = spy_db.fetch()
-        allItems = res.items
+        if st.button('Create DB Backup'):
+            res = spy_db.fetch()
+            allItems = res.items
 
-        while res.last:
-            res = spy_db.fetch(last=res.last)
-            allItems += res.items
+            while res.last:
+                res = spy_db.fetch(last=res.last)
+                allItems += res.items
 
-        db_df = pd.DataFrame(allItems)
+            db_df = pd.DataFrame(allItems)
 
-        csv = db_df.to_csv().encode('utf-8')
+            csv = db_df.to_csv().encode('utf-8')
 
-        st.download_button(
-            label='Download DB Backup',
-            data=csv,
-            file_name=datetime.date.today().strftime('%m-%d-%Y'),
-            mime='text/csv',
-        )
+            st.download_button(
+                label='Download DB Backup',
+                data=csv,
+                file_name=datetime.date.today().strftime('%m-%d-%Y'),
+                mime='text/csv',
+            )
 
         if fileUpload is not None:
             newData_df = pd.read_csv(fileUpload)
