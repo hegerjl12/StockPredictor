@@ -23,7 +23,7 @@ def process_data(spy_db, newData_df):
     date_string = datetime.date.today()
     list_of_times = ['12:30', '11:30', '10:30', '09:30', '08:30', '07:30', '06:30']
     candle_string = str(date_string) + "T" + list_of_times[i] + ":00-07:00"
-    st.write(date_string)
+    st.write(candle_string)
 
   #  while last_entry is None:
  #       last_entry = spy_db.get(candle_string)
