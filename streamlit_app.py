@@ -17,6 +17,21 @@ def connect_database():
     return deta, spy_db, spy_models
 
 def process_data(spy_db, newData_df):
+
+    last_entry = None
+    i = 0
+    date_string = datetime.date.today()
+    list_of_times = ['12:30', '11:30', '10:30', '09:30', '08:30', '07:30', '06:30']
+    candle_string = str(date_string) + "T" + list_of_times[i] + ":00-07:00"
+    st.write(date_string)
+
+  #  while last_entry is None:
+ #       last_entry = spy_db.get(candle_string)
+        #if i == 6:
+            #date_string = date_string.replace(day=date_string.day - 1)
+        #i = (i + 1) % 7
+
+
     # trim the upload to just columns we care about
     spy_df = newData_df[
         ['time', 'open', 'high', 'low', 'close', 'Momemtum', 'Slow Pressure', 'Fast Pressure']].copy()
@@ -29,8 +44,6 @@ def process_data(spy_db, newData_df):
     m_delta = [0]
     sp_delta = [0]
     fp_delta = [0]
-
-    st.write(spy_db[0])
 
     for i in range(len(spy_df['Momemtum'])):
 
