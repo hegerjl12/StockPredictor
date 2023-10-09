@@ -63,7 +63,7 @@ def process_data(spy_db, newData_df):
 
     st.write(spy_df[spy_df['time'] == last_entry['time']].index)
     matching_index = spy_df[spy_df['time'] == last_entry['time']].index
-    st.write(spy_df.iloc[matching_index-21:, :])
+    st.write(spy_df.loc[spy_df.index > matching_index-21])
 
     return spy_df
 
