@@ -57,11 +57,11 @@ def process_data(spy_db, newData_df):
     spy_df.drop(index=spy_df.index[0], axis=0, inplace=True)
     spy_df.reset_index(inplace=True)
 
-    while str(spy_df.head(0)['time']) != last_entry['time']:
-        spy_df.drop(index=spy_df.index[0], axis=0, inplace=True)
-        spy_df.reset_index(inplace=True)
+    # while str(spy_df.head(0)['time']) != last_entry['time']:
+    #     spy_df.drop(index=spy_df.index[0], axis=0, inplace=True)
+    #     spy_df.reset_index(inplace=True)
 
-    st.write(spy_df)
+    st.write(spy_df[spy_df['time' == last_entry]])
 
     return spy_df
 
