@@ -55,7 +55,7 @@ def process_data(spy_db, newData_df):
     spy_df['fp_delta'] = fp_delta
 
     spy_df.drop(index=spy_df.index[0], axis=0, inplace=True)
-    st.write(spy_df.iloc[0, 'time'])
+    st.write(spy_df.head(1))
  #   while spy_df.loc[0, 'time'] != last_entry['time']:
     #    spy_df.drop(index=spy_df.index[0], axis=0, inplace=True)
   #  st.write(spy_df)
