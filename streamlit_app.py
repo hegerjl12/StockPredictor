@@ -127,7 +127,6 @@ def create_put_model(db_df, winInput, drawdownInput):
 
     return dt
 
-@st.cache
 def backup_database(spy_db):
     res = spy_db.fetch()
     allItems = res.items
