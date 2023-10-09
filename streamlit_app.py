@@ -321,6 +321,7 @@ def main():
             #candle_string_prev = str(pred_date) + 'T' + str(pred_time-td) + '-07:00'
             selected_candle_data = spy_db.get(candle_string)
             st.write(selected_candle_data)
+            close_price = selected_candle_data['close']
 
             if selected_candle_data is not None:
                 download = spy_models.get('call_dt_model.pkl')
@@ -340,7 +341,7 @@ def main():
                 st.write(predictor_df)
 
                 if new_dt.predict(predictor_df) == 1:
-                    st.write("ML Says Buy")
+                    st.write("ML Says Buy", " - ", close_price, " Target: ", close_price+0.5)
                 else:
                     st.write("ML Says Wait")
 
@@ -416,7 +417,7 @@ def main():
             st.write(candle_string)
             selected_candle_data = spy_db.get(candle_string)
             st.write(selected_candle_data)
-            copy_of_data = selected_candle_data['close']
+            close_price = selected_candle_data['close']
 
             if selected_candle_data is not None:
                 download = spy_models.get('put_dt_model.pkl')
@@ -436,7 +437,7 @@ def main():
                 st.write(predictor_df)
 
                 if new_dt.predict(predictor_df) == 1:
-                    st.write("ML Says Buy", " - ", copy_of_data, " Target: ", copy_of_data+0.5)
+                    st.write("ML Says Buy", " - ", close_price, " Target: ", close_price-0.5)
                 else:
                     st.write("ML Says Wait")
 
