@@ -407,8 +407,8 @@ def main():
             # td = datetime.timedelta(hours=1)
             # candle_string_prev = str(pred_date) + 'T' + str(pred_time-td) + '-07:00'
             st.write(candle_string)
-            db_df = spy_db.get(candle_string)
-            st.write(db_df)
+            selected_candle_data = spy_db.get(candle_string)
+            st.write(selected_candle_data)
 
             if selected_candle_data is not None:
                 download = spy_models.get('put_dt_model.pkl')
