@@ -410,7 +410,7 @@ def main():
             db_df = spy_db.get(candle_string)
             st.write(db_df)
 
-            if db_df is not None:
+            if selected_candle_data is not None:
                 download = spy_models.get('put_dt_model.pkl')
                 download2 = spy_models.get('put_dt_model_70_30.pkl')
                 download3 = spy_models.get('put_dt_model_100_20.pkl')
