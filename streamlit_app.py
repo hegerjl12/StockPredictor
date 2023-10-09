@@ -127,6 +127,18 @@ def create_put_model(db_df, winInput, drawdownInput):
 
     return dt
 
+@st.cache
+def backup_database(db_df):
+    csv = db_df.to_csv().encode('utf-8')
+
+    st.download_button(
+        label='Download DB Backup',
+        data=csv,
+        file_name=datetime.date.today().strftime('%m-%d-%Y'),
+        mime='text/csv',
+    )
+
+
 def main():
     st.set_page_config(
         page_title="Stonkz Predictor",
@@ -143,6 +155,8 @@ def main():
     with newDataTab:
         # Upload a csv export file
         fileUpload = st.file_uploader('Upload SPY 1 HR Chart Data', type='csv')
+
+        backup_database()
 
         if fileUpload is not None:
             newData_df = pd.read_csv(fileUpload)
