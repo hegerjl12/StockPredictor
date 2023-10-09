@@ -30,8 +30,6 @@ def process_data(spy_db, newData_df):
             date_string = date_string.replace(day=date_string.day - 1)
         i = (i + 1) % 7
 
-    st.write(last_entry)
-
     # trim the upload to just columns we care about
     spy_df = newData_df[
         ['time', 'open', 'high', 'low', 'close', 'Momemtum', 'Slow Pressure', 'Fast Pressure']].copy()
@@ -57,6 +55,10 @@ def process_data(spy_db, newData_df):
     spy_df['fp_delta'] = fp_delta
 
     spy_df.drop(index=spy_df.index[0], axis=0, inplace=True)
+
+    while spy_df.loc[0, 'time'] != last_entry['time']:
+        spy_df.drop(index=spy_df.index[0], axis=0, inplace=True)
+    st.write(spy_df)
 
     return spy_df
 
