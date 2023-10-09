@@ -55,13 +55,13 @@ def process_data(spy_db, newData_df):
     spy_df['fp_delta'] = fp_delta
 
     spy_df.drop(index=spy_df.index[0], axis=0, inplace=True)
-    spy_df.reset_index(inplace=True)
+    #spy_df.reset_index(inplace=True)
 
     # while str(spy_df.head(0)['time']) != last_entry['time']:
     #     spy_df.drop(index=spy_df.index[0], axis=0, inplace=True)
     #     spy_df.reset_index(inplace=True)
 
-    st.write(spy_df[spy_df['time'] == last_entry['time']])
+    st.write(spy_df[spy_df['time'] == last_entry['time']].index)
 
     return spy_df
 
