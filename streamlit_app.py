@@ -435,7 +435,7 @@ def main():
                 st.write(predictor_df)
 
                 if new_dt.predict(predictor_df) == 1:
-                    st.write("ML Says Buy")
+                    st.write("ML Says Buy", " - ", selected_candle_data['close'], " Target: ", selected_candle_data['close']+0.5)
                 else:
                     st.write("ML Says Wait")
 
