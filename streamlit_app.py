@@ -30,6 +30,8 @@ def process_data(spy_db, newData_df):
     sp_delta = [0]
     fp_delta = [0]
 
+    st.write(spy_db[0])
+
     for i in range(len(spy_df['Momemtum'])):
 
         if i < len(spy_df['Momemtum']) - 1:
