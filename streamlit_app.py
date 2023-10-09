@@ -147,6 +147,8 @@ def backup_database(spy_db):
         mime='text/csv',
     )
 
+    return
+
 
 def main():
     st.set_page_config(
