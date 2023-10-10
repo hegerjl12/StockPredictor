@@ -22,13 +22,14 @@ def process_data(spy_db, newData_df):
     i = 0
     date_string = datetime.date.today()
     list_of_times = ['12:30', '11:30', '10:30', '09:30', '08:30', '07:30', '06:30']
-    candle_string = str(date_string) + "T" + list_of_times[i] + ":00-07:00"
+
 
     while last_entry is None:
+        candle_string = str(date_string) + "T" + list_of_times[i] + ":00-07:00"
         last_entry = spy_db.get(candle_string)
         st.write(candle_string)
         if i == 6:
-            date_string += datetime.timedelta(days=1)
+            date_string += datetime.timedelta(days=-1)
         i = (i + 1) % 7
 
     # trim the upload to just columns we care about
