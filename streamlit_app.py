@@ -27,7 +27,6 @@ def process_data(spy_db, newData_df):
     while last_entry is None:
         candle_string = str(date_string) + "T" + list_of_times[i] + ":00-07:00"
         last_entry = spy_db.get(candle_string)
-        st.write(candle_string)
         if i == 6:
             date_string += datetime.timedelta(days=-1)
         i = (i + 1) % 7
@@ -59,11 +58,8 @@ def process_data(spy_db, newData_df):
     spy_df.drop(index=spy_df.index[0], axis=0, inplace=True)
     spy_df.reset_index(inplace=True)
 
-  #  while str(spy_df.head(0)['time']) != last_entry['time']:
-      #  spy_df.drop(index=spy_df.index[0], axis=0, inplace=True)
-        #spy_df.reset_index(inplace=True)
-
-    st.write(spy_df.head(1)['time'])
+    matched_index = spy_df.loc[spy_df['time'] == last_entry['time']].index
+    st.write(matched_index)
 
     return spy_df
 
