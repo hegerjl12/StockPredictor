@@ -60,9 +60,8 @@ def process_data(spy_db, newData_df):
 
     matched_index = spy_df.loc[spy_df['time'] == last_entry['time']].index
     integer_index = matched_index[0]
-    st.write(spy_df.loc[integer_index-21:, :])
 
-    return spy_df
+    return spy_df.loc[integer_index-21:, :]
 
 def add_new_data_to_database(spy_db, spy_df):
     # Add the rows to the DB
