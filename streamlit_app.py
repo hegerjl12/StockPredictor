@@ -26,6 +26,7 @@ def process_data(spy_db, newData_df):
 
     while last_entry is None:
         last_entry = spy_db.get(candle_string)
+        st.write(candle_string)
         if i == 6:
             date_string += datetime.timedelta(days=-1)
         i = (i + 1) % 7
