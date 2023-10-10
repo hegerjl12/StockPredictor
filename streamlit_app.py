@@ -27,7 +27,7 @@ def process_data(spy_db, newData_df):
     while last_entry is None:
         last_entry = spy_db.get(candle_string)
         if i == 6:
-            date_string = date_string.replace(day=date_string.day - 1)
+            date_string += datetime.timedelta(days=-1)
         i = (i + 1) % 7
 
     # trim the upload to just columns we care about
