@@ -108,6 +108,7 @@ def create_call_model(db_df, winInput, drawdownInput):
     st.write("Accuracy: ", accy)
 
     results_df = pd.DataFrame({'pred': y_pred, 'actual': y_test})
+    st.write(results_df)
 
     return dt
 
@@ -144,6 +145,8 @@ def create_put_model(db_df, winInput, drawdownInput):
     st.write("Accuracy: ", accy)
 
     results_df = pd.DataFrame({'pred': y_pred, 'actual': y_test})
+    st.write(results_df)
+
 
     return dt
 
