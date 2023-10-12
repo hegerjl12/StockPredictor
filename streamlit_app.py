@@ -365,7 +365,7 @@ def main():
 
             if selected_candle_data is not None:
                 download = spy_models.get('call_dt_model.pkl')
-                download5 = spy_models.get('new_call_dt_model_50_50.pkl')
+                download5 = spy_models.get('new_call_dt_model_50.pkl')
                 download2 = spy_models.get('call_dt_model_70_30.pkl')
                 download3 = spy_models.get('call_dt_model_100_20.pkl')
                 download4 = spy_models.get('call_dt_model_50_10.pkl')
@@ -389,9 +389,9 @@ def main():
                     st.write("ML Says Wait")
 
                 if new_dt5.predict(predictor_df) == 1:
-                    st.write("ML NEW 50/50 Says Buy")
+                    st.write("ML NEW 50 Says Buy")
                 else:
-                    st.write("ML NEW 50/50 Says Wait")
+                    st.write("ML NEW 50 Says Wait")
 
                 if new_dt2.predict(predictor_df) == 1:
                     st.write("ML 70/30 Says Buy")
@@ -469,7 +469,7 @@ def main():
 
             if selected_candle_data is not None:
                 download = spy_models.get('put_dt_model.pkl')
-                download5 = spy_models.get('new_put_dt_model_50_50.pkl')
+                download5 = spy_models.get('new_put_dt_model_50.pkl')
                 download2 = spy_models.get('put_dt_model_70_30.pkl')
                 download3 = spy_models.get('put_dt_model_100_20.pkl')
                 download4 = spy_models.get('put_dt_model_50_10.pkl')
@@ -493,9 +493,9 @@ def main():
                     st.write("ML Says Wait")
 
                 if new_dt5.predict(predictor_df) == 1:
-                    st.write("ML NEW 50/50 Says Buy")
+                    st.write("ML NEW 50 Says Buy")
                 else:
-                    st.write("ML NEW 50/50 Says Wait")
+                    st.write("ML NEW 50 Says Wait")
 
                 if new_dt2.predict(predictor_df) == 1:
                     st.write("ML 70/30 Says Buy")
