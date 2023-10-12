@@ -113,7 +113,7 @@ def create_call_model(db_df, winInput, drawdownInput):
 
 def create_put_model(db_df, winInput, drawdownInput):
     wins_drawdown = []
-    w_or_l = [0]
+    w_or_l = []
 
     for i in range((len(db_df) - 1)):
         # if db_df.loc[i, 'm_delta'] < momentumInput and db_df.loc[i, 'sp_delta'] < spInput and \
@@ -123,6 +123,7 @@ def create_put_model(db_df, winInput, drawdownInput):
             w_or_l.append(1)
         else:
             w_or_l.append(0)
+    w_or_l.append(0)
 
     st.write("Average Drawdown on ", len(wins_drawdown), ": ", np.average(wins_drawdown))
 
