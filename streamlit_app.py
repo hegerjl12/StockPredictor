@@ -365,10 +365,12 @@ def main():
 
             if selected_candle_data is not None:
                 download = spy_models.get('call_dt_model.pkl')
+                download5 = spy_models.get('new_call_dt_model_70_30.pkl')
                 download2 = spy_models.get('call_dt_model_70_30.pkl')
                 download3 = spy_models.get('call_dt_model_100_20.pkl')
                 download4 = spy_models.get('call_dt_model_50_10.pkl')
                 new_dt = pickle.loads(download.read())
+                new_dt5 = pickle.loads(download5.read())
                 new_dt2 = pickle.loads(download2.read())
                 new_dt3 = pickle.loads(download3.read())
                 new_dt4 = pickle.loads(download4.read())
@@ -385,6 +387,11 @@ def main():
                     st.write("ML Says Buy", " - ", close_price, " Target: ", close_price+0.5)
                 else:
                     st.write("ML Says Wait")
+
+                if new_dt5.predict(predictor_df) == 1:
+                    st.write("ML NEW 70/30 Says Buy")
+                else:
+                    st.write("ML NEW 70/30 Says Wait")
 
                 if new_dt2.predict(predictor_df) == 1:
                     st.write("ML 70/30 Says Buy")
@@ -462,10 +469,12 @@ def main():
 
             if selected_candle_data is not None:
                 download = spy_models.get('put_dt_model.pkl')
+                download5 = spy_models.get('new_put_dt_model_70_30.pkl')
                 download2 = spy_models.get('put_dt_model_70_30.pkl')
                 download3 = spy_models.get('put_dt_model_100_20.pkl')
                 download4 = spy_models.get('put_dt_model_50_10.pkl')
                 new_dt = pickle.loads(download.read())
+                new_dt5 = pickle.loads(download5.read())
                 new_dt2 = pickle.loads(download2.read())
                 new_dt3 = pickle.loads(download3.read())
                 new_dt4 = pickle.loads(download4.read())
@@ -482,6 +491,11 @@ def main():
                     st.write("ML Says Buy", " - ", close_price, " Target: ", close_price-0.5)
                 else:
                     st.write("ML Says Wait")
+
+                if new_dt5.predict(predictor_df) == 1:
+                    st.write("ML NEW 70/30 Says Buy")
+                else:
+                    st.write("ML NEW 70/30 Says Wait")
 
                 if new_dt2.predict(predictor_df) == 1:
                     st.write("ML 70/30 Says Buy")
