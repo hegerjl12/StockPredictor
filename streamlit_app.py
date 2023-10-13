@@ -94,7 +94,7 @@ def create_call_model(db_df, winInput, drawdownInput):
     db_df['w_or_l'] = w_or_l
 
     # X_feed = db_df[db_df['w_or_l'] >= 0]
-    X = db_df.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key', 'change_close_open', 'change_high_open', 'change_low_open', 'Fast Pressure', 'Slow Pressure', 'Momemtum'], axis=1).values
+    X = db_df.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key', 'change_close_open', 'change_low_open'], axis=1).values
     y = db_df['w_or_l'].values
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
@@ -105,7 +105,14 @@ def create_call_model(db_df, winInput, drawdownInput):
     y_pred = dt.predict(X_test)
     accy = accuracy_score(y_test, y_pred)
 
+    i = 0
+    count = 0
+    for entry in y_pred:
+        if entry == y_test[i]:
+            count += 1;
+
     st.write("Accuracy: ", accy)
+    st.write("Number of wins predicted: ", count)
 
     results_df = pd.DataFrame({'pred': y_pred, 'actual': y_test})
     st.write(results_df)
