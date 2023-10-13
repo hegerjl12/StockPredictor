@@ -82,7 +82,7 @@ def create_call_model(db_df, winInput, drawdownInput):
         # if db_df.loc[i, 'm_delta'] > momentumInput and db_df.loc[i, 'sp_delta'] > spInput and db_df.loc[
         #     i, 'fp_delta'] > fpInput:
         # st.write(i+1, db_df.loc[i+1, 'change'])
-        if  db_df.loc[i, 'fp_delta'] > 0 and db_df.loc[i + 1, 'change_close_open'] > winInput: # and db_df.loc[i + 1, 'change_low_open'] > drawdownInput:
+        if  db_df.loc[i, 'm_delta'] > 0 and db_df.loc[i + 1, 'change_close_open'] > winInput: # and db_df.loc[i + 1, 'change_low_open'] > drawdownInput:
             wins_drawdown.append(db_df.loc[i + 1, 'change_low_open'])
             w_or_l.append(1)
         else:
@@ -94,7 +94,7 @@ def create_call_model(db_df, winInput, drawdownInput):
     db_df['w_or_l'] = w_or_l
 
     # X_feed = db_df[db_df['w_or_l'] >= 0]
-    X = db_df.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key', 'change_low_open'], axis=1).values
+    X = db_df.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key'], axis=1).values
     y = db_df['w_or_l'].values
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
