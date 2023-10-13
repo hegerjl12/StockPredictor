@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from deta import Deta
@@ -100,9 +101,11 @@ def create_call_model(db_df, winInput, drawdownInput):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
 
     dt = DecisionTreeClassifier(max_depth=3, random_state=12)
+    clf = KNeighborsClassifier(n_neighbors=5)
     dt.fit(X_train, y_train)
+    clf.fit(X_train, y_train)
 
-    y_pred = dt.predict(X_test)
+    y_pred = clf.predict(X_test)
     accy = accuracy_score(y_test, y_pred)
 
     i = 0
