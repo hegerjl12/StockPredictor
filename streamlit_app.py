@@ -116,6 +116,7 @@ def create_call_model(db_df, winInput, drawdownInput):
             count_wins += 1
         if entry == 1 and y_test[i] == 0:
             count_losses += 1
+        i += 1
 
 
 
