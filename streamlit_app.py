@@ -105,7 +105,7 @@ def create_call_model(db_df, winInput, drawdownInput):
     dt.fit(X_train, y_train)
     clf.fit(X_train, y_train)
 
-    y_pred = clf.predict(X_test)
+    y_pred = dt.predict(X_test)
     accy = accuracy_score(y_test, y_pred)
 
     i = 0
