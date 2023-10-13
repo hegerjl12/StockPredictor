@@ -99,7 +99,7 @@ def create_call_model(db_df, winInput, drawdownInput):
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
 
-    dt = DecisionTreeClassifier(max_depth=4, random_state=12)
+    dt = DecisionTreeClassifier(max_depth=10, random_state=12)
     dt.fit(X_train, y_train)
 
     y_pred = dt.predict(X_test)
@@ -149,6 +149,19 @@ def create_put_model(db_df, winInput, drawdownInput):
 
 
     return dt
+
+def backtester(db_df, dt, spy_models):
+    wins = []
+    loses = []
+    download5 = spy_models.get('new_call_dt_model_50.pkl')
+    new_dt5 = pickle.loads(download5.read())
+    remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
+
+    for row in db_df:
+        for key in remove_list:
+            del row[key]
+        predictor_df = pd.DataFrame(data=row, index=[0]).values
+        dt.predict(predictor_df)
 
 
 def main():
