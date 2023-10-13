@@ -82,7 +82,7 @@ def create_call_model(db_df, winInput, drawdownInput):
         # if db_df.loc[i, 'm_delta'] > momentumInput and db_df.loc[i, 'sp_delta'] > spInput and db_df.loc[
         #     i, 'fp_delta'] > fpInput:
         # st.write(i+1, db_df.loc[i+1, 'change'])
-        if db_df.loc[i, 'm_delta'] > 0 and db_df.loc[i, 'fp_delta'] > 0 and db_df.loc[i + 1, 'change_close_open'] > winInput: # and db_df.loc[i + 1, 'change_low_open'] > drawdownInput:
+        if  db_df.loc[i, 'fp_delta'] > 0 and db_df.loc[i + 1, 'change_close_open'] > winInput: # and db_df.loc[i + 1, 'change_low_open'] > drawdownInput:
             wins_drawdown.append(db_df.loc[i + 1, 'change_low_open'])
             w_or_l.append(1)
         else:
@@ -109,10 +109,11 @@ def create_call_model(db_df, winInput, drawdownInput):
     count_wins = 0
     count_losses = 0
     for entry in y_pred:
-        if entry == '1' and y_test[i] == '1':
+        if entry == 1 and y_test[i] == 1:
             count_wins += 1
-        if entry == '1' and y_test[i] == '0':
+        if entry == 1 and y_test[i] == 0:
             count_losses += 1
+
 
 
 
