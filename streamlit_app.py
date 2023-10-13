@@ -106,13 +106,19 @@ def create_call_model(db_df, winInput, drawdownInput):
     accy = accuracy_score(y_test, y_pred)
 
     i = 0
-    count = 0
+    count_wins = 0
+    count_losses = 0
     for entry in y_pred:
-        if entry == y_test[i]:
-            count += 1;
+        if entry == 1 and y_test[i] == 1:
+            count_wins += 1
+        if entry == 1 and y_test[i] == 0:
+            count_losses += 1
+
+
 
     st.write("Accuracy: ", accy)
-    st.write("Number of wins predicted: ", count)
+    st.write("Number of wins predicted: ", count_wins, "/", len(y_pred))
+    st.write("Number of losses predicted: ", count_losses, "/", len(y_pred))
 
     results_df = pd.DataFrame({'pred': y_pred, 'actual': y_test})
     st.write(results_df)
