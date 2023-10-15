@@ -102,7 +102,7 @@ def create_call_model(db_df, winInput, drawdownInput):
     X = db_df.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key', 'next_change_close'], axis=1)
     y = db_df['next_change_close'].values
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12)
 
   #  dt = DecisionTreeClassifier(max_depth=3, random_state=12)
   #  clf = KNeighborsClassifier(n_neighbors=3)
