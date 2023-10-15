@@ -80,6 +80,7 @@ def add_new_data_to_database(spy_db, spy_df):
 def create_call_model(db_df, winInput, drawdownInput):
     wins_drawdown = []
     w_or_l = []
+    next_close_change = []
 
     for i in range((len(db_df) - 1)):
         if db_df.loc[i + 1, 'change_close_open'] > winInput and db_df.loc[i + 1, 'change_low_open'] > drawdownInput:
@@ -88,14 +89,16 @@ def create_call_model(db_df, winInput, drawdownInput):
         else:
             w_or_l.append(0)
     w_or_l.append(0)
+    next_close_change.append(db_df.loc[i+1, 'change_close_open'])
 
     st.write("Average Drawdown on ", len(wins_drawdown), ": ", np.average(wins_drawdown))
 
     db_df['w_or_l'] = w_or_l
+    db_df['next_change_close'] = next_close_change
 
     # X_feed = db_df[db_df['w_or_l'] >= 0]
-    X = db_df.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key'], axis=1)
-    y = db_df['w_or_l'].values
+    X = db_df.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key', 'next_change_close'], axis=1)
+    y = db_df['next_change_close'].values
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
 
