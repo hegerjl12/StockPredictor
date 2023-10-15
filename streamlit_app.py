@@ -88,8 +88,10 @@ def create_call_model(db_df, winInput, drawdownInput):
             w_or_l.append(1)
         else:
             w_or_l.append(0)
+        next_close_change.append(db_df.loc[i + 1, 'change_close_open'])
     w_or_l.append(0)
-    next_close_change.append(db_df.loc[i+1, 'change_close_open'])
+    next_close_change.append(0)
+
 
     st.write("Average Drawdown on ", len(wins_drawdown), ": ", np.average(wins_drawdown))
 
