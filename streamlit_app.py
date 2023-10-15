@@ -129,10 +129,8 @@ def create_call_model(db_df, winInput, drawdownInput):
     # Sort importances
     importances_sorted = importances.sort_values()
 
-    # Draw a horizontal barplot of importances_sorted
-    imp_plot = importances_sorted.plot(kind='barh', color='lightgreen')
-
-    st.pyplot(imp_plot)
+    st.dataframe(importances_sorted)
+    st.bar_chart(importances_sorted)
 
 
 
