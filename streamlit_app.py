@@ -250,7 +250,7 @@ def main():
             st.download_button(
                 label='Download DB Backup',
                 data=csv,
-                file_name=datetime.date.today().strftime('%m-%d-%Y'),
+                file_name=datetime.date.today().strftime('%m-%d-%Y')+'.csv',
                 mime='text/csv',
             )
 
