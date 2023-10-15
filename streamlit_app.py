@@ -3,12 +3,14 @@ import numpy as np
 import streamlit as st
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error as MSE
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from deta import Deta
 import pickle
 import datetime
-
+import matplotlib.pyplot as plt
 
 def connect_database():
     deta = Deta(st.secrets['DB_TOKEN'])
@@ -97,12 +99,46 @@ def create_call_model(db_df, winInput, drawdownInput):
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
 
-    dt = DecisionTreeClassifier(max_depth=3, random_state=12)
-    clf = KNeighborsClassifier(n_neighbors=3)
-    dt.fit(X_train, y_train)
-    clf.fit(X_train, y_train)
+  #  dt = DecisionTreeClassifier(max_depth=3, random_state=12)
+  #  clf = KNeighborsClassifier(n_neighbors=3)
+  #  dt.fit(X_train, y_train)
+  #  clf.fit(X_train, y_train)
+    # Import RandomForestRegressor
 
-    y_pred = clf.predict(X_test)
+
+    # Instantiate rf
+    rf = RandomForestRegressor(n_estimators=25,
+                               random_state=2)
+
+    # Fit rf to the training set
+    rf.fit(X_train, y_train)
+
+    # Predict the test set labels
+    y_pred = rf.predict(X_test)
+
+    # Evaluate the test set RMSE
+    rmse_test = MSE(y_test, y_pred) ** (1 / 2)
+
+    # Print rmse_test
+    st.write('Test set RMSE of rf: ', rmse_test)
+
+    # Create a pd.Series of features importances
+    importances = pd.Series(data=rf.feature_importances_,
+                            index=X_train.columns)
+
+    # Sort importances
+    importances_sorted = importances.sort_values()
+
+    # Draw a horizontal barplot of importances_sorted
+    importances_sorted.plot(kind='barh', color='lightgreen')
+    plt.title('Features Importances')
+    plt.show()
+
+
+
+
+
+  #  y_pred = clf.predict(X_test)
     accy = accuracy_score(y_test, y_pred)
 
     i = 0
@@ -125,7 +161,7 @@ def create_call_model(db_df, winInput, drawdownInput):
     results_df = pd.DataFrame({'pred': y_pred, 'actual': y_test})
     st.write(results_df)
 
-    return dt
+    return rf #dt
 
 def create_put_model(db_df, winInput, drawdownInput):
     wins_drawdown = []
