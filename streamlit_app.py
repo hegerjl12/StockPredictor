@@ -130,16 +130,16 @@ def create_call_model(db_df, winInput, drawdownInput):
     importances_sorted = importances.sort_values()
 
     # Draw a horizontal barplot of importances_sorted
-    importances_sorted.plot(kind='barh', color='lightgreen')
-    plt.title('Features Importances')
-    plt.show()
+    imp_plot = importances_sorted.plot(kind='barh', color='lightgreen')
+    imp_plot.title('Features Importances')
+    st.pyplot(imp_plot)
 
 
 
 
 
   #  y_pred = clf.predict(X_test)
-    accy = accuracy_score(y_test, y_pred)
+ #   accy = accuracy_score(y_test, y_pred)
 
     i = 0
     count_wins = 0
@@ -154,7 +154,7 @@ def create_call_model(db_df, winInput, drawdownInput):
 
 
 
-    st.write("Accuracy: ", accy)
+  #  st.write("Accuracy: ", accy)
     st.write("Number of wins predicted: ", count_wins, "/", len(y_pred))
     st.write("Number of losses predicted: ", count_losses, "/", len(y_pred))
 
