@@ -435,15 +435,12 @@ def main():
 
             if selected_candle_data is not None:
                 download = spy_models.get('call_dt_model.pkl')
-                download5 = spy_models.get('new_call_dt_model_50.pkl')
-                download2 = spy_models.get('call_dt_model_70_30.pkl')
-                download3 = spy_models.get('call_dt_model_100_20.pkl')
-                download4 = spy_models.get('call_dt_model_50_10.pkl')
+                download2 = spy_models.get('dt1_model.pkl')
+                download3 = spy_models.get('rf1_model.pkl')
                 new_dt = pickle.loads(download.read())
-                new_dt5 = pickle.loads(download5.read())
                 new_dt2 = pickle.loads(download2.read())
-                new_dt3 = pickle.loads(download3.read())
-                new_dt4 = pickle.loads(download4.read())
+                new_rf3 = pickle.loads(download3.read())
+
 
                 close_price = selected_candle_data['close']
                 remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
@@ -458,25 +455,14 @@ def main():
                 else:
                     st.write("ML Says Wait")
 
-                if new_dt5.predict(predictor_df) == 1:
+                if new_dt2.predict(predictor_df) == 1:
                     st.write("ML NEW 50 Says Buy")
+                    pred_price = new_rf3.predict(predictor_df)
+                    st.write("Predicted Price: ", pred_price)
                 else:
                     st.write("ML NEW 50 Says Wait")
 
-                if new_dt2.predict(predictor_df) == 1:
-                    st.write("ML 70/30 Says Buy")
-                else:
-                    st.write("ML 70/30 Says Wait")
 
-                if new_dt3.predict(predictor_df) == 1:
-                    st.write("ML 100/20 Says Buy")
-                else:
-                    st.write("ML 100/20 Says Wait")
-
-                if new_dt4.predict(predictor_df) == 1:
-                    st.write("ML 50/10 Says Buy")
-                else:
-                    st.write("ML 50/10 Says Wait")
 
 
         with PutTab:
