@@ -452,6 +452,8 @@ def main():
 
                 if new_dt.predict(predictor_df) == 1:
                     st.write("ML Says Buy", " - ", close_price, " Target: ", close_price+0.5)
+                    pred_price = new_rf3.predict(predictor_df)
+                    st.write("Predicted Price: ", pred_price)
                 else:
                     st.write("ML Says Wait")
 
