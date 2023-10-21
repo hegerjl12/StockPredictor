@@ -401,7 +401,7 @@ def main():
                 download3 = spy_models.get('put_rf1_model.pkl')
                 new_dt = pickle.loads(download.read())
                 new_dt2 = pickle.loads(download2.read())
-                new_dt3 = pickle.loads(download3.read())
+                new_rf3 = pickle.loads(download3.read())
 
                 close_price = selected_candle_data['close']
                 remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
