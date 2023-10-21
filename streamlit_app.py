@@ -318,40 +318,6 @@ def main():
 
             if calls_or_puts == 'Calls':
 
-                # wins_drawdown = []
-                # w_or_l = [0]
-                #
-                # for i in range((len(db_df) - 1)):
-                #     # if db_df.loc[i, 'm_delta'] > momentumInput and db_df.loc[i, 'sp_delta'] > spInput and db_df.loc[
-                #     #     i, 'fp_delta'] > fpInput:
-                #         # st.write(i+1, db_df.loc[i+1, 'change'])
-                #     if db_df.loc[i + 1, 'change_close_open'] > winInput and db_df.loc[i + 1, 'change_low_open'] > drawdownInput:
-                #         wins_drawdown.append(db_df.loc[i + 1, 'change_low_open'])
-                #         w_or_l.append(1)
-                #     else:
-                #         w_or_l.append(0)
-                #
-                # st.write("Average Drawdown on ", len(wins_drawdown), ": ", np.average(wins_drawdown))
-                #
-                # db_df['w_or_l'] = w_or_l
-                #
-                #
-                # #X_feed = db_df[db_df['w_or_l'] >= 0]
-                # X = db_df.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key'], axis=1).values
-                # y = db_df['w_or_l'].values
-                #
-                # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
-                #
-                # dt = DecisionTreeClassifier(max_depth=2, random_state=12)
-                # dt.fit(X_train, y_train)
-                #
-                # y_pred = dt.predict(X_test)
-                # accy = accuracy_score(y_test, y_pred)
-                #
-                # st.write("Accuracy: ", accy)
-                #
-                # results_df = pd.DataFrame({'pred': y_pred, 'actual': y_test})
-
                 dt = create_call_model(db_df, winInput, drawdownInput)
 
                 st.download_button(
@@ -362,40 +328,6 @@ def main():
 
             if calls_or_puts == 'Puts':
 
-                # wins_drawdown = []
-                # w_or_l = [0]
-                #
-                # for i in range((len(db_df)-1)):
-                #      # if db_df.loc[i, 'm_delta'] < momentumInput and db_df.loc[i, 'sp_delta'] < spInput and \
-                #      #         db_df.loc[i, 'fp_delta'] < fpInput:
-                #      if db_df.loc[i + 1, 'change_close_open'] < winInput and db_df.loc[i + 1, 'change_high_open'] < drawdownInput:
-                #          wins_drawdown.append(db_df.loc[i + 1, 'change_high_open'])
-                #          w_or_l.append(1)
-                #      else:
-                #          w_or_l.append(0)
-                #      # else:
-                #      #     both.append(0)
-                #
-                # st.write("Average Drawdown on ", len(wins_drawdown), ": ", np.average(wins_drawdown))
-                #
-                # db_df['w_or_l'] = w_or_l
-                #
-                #
-                # #X_feed = db_df[db_df['w_or_l'] >= 0]
-                # X = db_df.drop(['time', 'w_or_l', 'open', 'high', 'low', 'close', 'key'], axis=1).values
-                # y = db_df['w_or_l'].values
-                #
-                # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=12, stratify=y)
-                #
-                # dt = DecisionTreeClassifier(max_depth=2, random_state=12)
-                # dt.fit(X_train, y_train)
-                #
-                # y_pred = dt.predict(X_test)
-                # accy = accuracy_score(y_test, y_pred)
-                #
-                # st.write("Accuracy: ", accy)
-                #
-                # results_df = pd.DataFrame({'pred': y_pred, 'actual': y_test})
                 dt = create_put_model(db_df, winInput, drawdownInput)
 
                 st.download_button(
@@ -404,25 +336,11 @@ def main():
                     file_name="dt_model.pkl",
                 )
 
-            # with open('dt_model.pkl', 'wb') as f:
-            #   pickle.dump(dt, f)
-
-            #####spy_models.put('dt_model.pkl', f)
-
     with predictorTab:
 
         CallTab, PutTab = st.tabs(['Calls', 'Puts'])
 
         with CallTab:
-
-           # res = spy_db.fetch()
-           # allItems = res.items
-
-         #   while res.last:
-         #       res = spy_db.fetch(last=res.last)
-          #      allItems += res.items
-
-        #    db_df = pd.DataFrame(allItems)
 
             pred_date = st.date_input('Choose Date', datetime.date.today(), key='call_date')
             pred_time = st.selectbox('Choose Candle', ['06:30', '07:30', '08:30', '09:30', '10:30', '11:30', '12:30'], key='call_time_selction')
@@ -467,52 +385,6 @@ def main():
 
         with PutTab:
 
-            # calcValue = st.radio(
-            #     'Choose to use High or Close for Calc',
-            #     key='put_calc_value',
-            #     options=['high', 'low', 'close'],
-            #     index=2,
-            # )
-
-            # res = spy_db.fetch()
-            # allItems = res.items
-            #
-            # while res.last:
-            #     res = spy_db.fetch(last=res.last)
-            #     allItems += res.items
-            #
-            # db_df = pd.DataFrame(allItems)
-            #
-            # db_df['change'] = db_df[calcValue] - db_df['open']
-            #
-            # # add column for the deltas for momentum, sp, fp
-            # m_delta = [0]
-            # sp_delta = [0]
-            # fp_delta = [0]
-            #
-            # for i in range(len(db_df['Momemtum'])):
-            #
-            #     if i < len(db_df['Momemtum']) - 1:
-            #         m_delta.append(db_df.loc[i + 1, 'Momemtum'] - db_df.loc[i, 'Momemtum'])
-            #         sp_delta.append(db_df.loc[i + 1, 'Slow Pressure'] - db_df.loc[i, 'Slow Pressure'])
-            #         fp_delta.append(db_df.loc[i + 1, 'Fast Pressure'] - db_df.loc[i, 'Fast Pressure'])
-            #
-            # db_df['m_delta'] = m_delta
-            # db_df['sp_delta'] = sp_delta
-            # db_df['fp_delta'] = fp_delta
-            #
-            #
-            # download = spy_models.get('dt_model.pkl')
-            # new_dt = pickle.loads(download.read())
-            #
-            # predictor_df = pd.DataFrame(
-            #     db_df.iloc[-2].drop(['time', 'open', 'high', 'low', 'close', 'key'])).values
-            # st.write(predictor_df)
-            # if new_dt.predict(predictor_df.T) == 1:
-            #     st.write("ML Says Buy")
-            # else:
-            #     st.write("ML Says Wait")
-
             pred_date = st.date_input('Choose Date', datetime.date.today(), key='put_date')
             pred_time = st.selectbox('Choose Candle', ['06:30', '07:30', '08:30', '09:30', '10:30', '11:30', '12:30'], key='put_time_selection')
             candle_string = str(pred_date) + 'T' + str(pred_time) + ':00-07:00'
@@ -525,15 +397,11 @@ def main():
 
             if selected_candle_data is not None:
                 download = spy_models.get('put_dt_model.pkl')
-                download5 = spy_models.get('new_put_dt_model_50.pkl')
-                download2 = spy_models.get('put_dt_model_70_30.pkl')
-                download3 = spy_models.get('put_dt_model_100_20.pkl')
-                download4 = spy_models.get('put_dt_model_50_10.pkl')
+                download2 = spy_models.get('put_dt1_model.pkl')
+                download3 = spy_models.get('put_rf1_model.pkl')
                 new_dt = pickle.loads(download.read())
-                new_dt5 = pickle.loads(download5.read())
                 new_dt2 = pickle.loads(download2.read())
                 new_dt3 = pickle.loads(download3.read())
-                new_dt4 = pickle.loads(download4.read())
 
                 close_price = selected_candle_data['close']
                 remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
@@ -548,25 +416,13 @@ def main():
                 else:
                     st.write("ML Says Wait")
 
-                if new_dt5.predict(predictor_df) == 1:
+                if new_dt2.predict(predictor_df) == 1:
                     st.write("ML NEW 50 Says Buy")
+                    pred_price = new_rf3.predict(predictor_df)
+                    st.write("Predicted Price: ", pred_price)
                 else:
                     st.write("ML NEW 50 Says Wait")
 
-                if new_dt2.predict(predictor_df) == 1:
-                    st.write("ML 70/30 Says Buy")
-                else:
-                    st.write("ML 70/30 Says Wait")
-
-                if new_dt3.predict(predictor_df) == 1:
-                    st.write("ML 100/20 Says Buy")
-                else:
-                    st.write("ML 100/20 Says Wait")
-
-                if new_dt4.predict(predictor_df) == 1:
-                    st.write("ML 50/10 Says Buy")
-                else:
-                    st.write("ML 50/10 Says Wait")
 
 
     return
