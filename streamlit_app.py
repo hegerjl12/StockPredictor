@@ -376,7 +376,7 @@ def main():
                 if new_dt2.predict(predictor_df) == 1:
                     st.write("ML NEW 50 Says Buy")
                     pred_price = new_rf3.predict(predictor_df)
-                    st.write("Predicted Price: ", (close_price+float(pred_price)))
+                    st.write("Predicted Price: ", round((close_price+float(pred_price)),2))
                 else:
                     st.write("ML NEW 50 Says Wait")
 
@@ -419,7 +419,7 @@ def main():
                 if new_dt2.predict(predictor_df) == 1:
                     st.write("ML NEW 50 Says Buy")
                     pred_price = new_rf3.predict(predictor_df)
-                    st.write("Predicted Price: ", (close_price+float(pred_price)))
+                    st.write("Predicted Price: ", round((close_price+float(pred_price)), 2))
                 else:
                     st.write("ML NEW 50 Says Wait")
 
