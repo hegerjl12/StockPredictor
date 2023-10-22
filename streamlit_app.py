@@ -359,11 +359,8 @@ def main():
             else:
                 next_time = '12:30'
 
-
             candle_string = str(pred_date) + 'T' + str(pred_time) + ':00-07:00'
             next_candle_string = str(pred_date) + 'T' + str(next_time) + ':00-07:00'
-            #td = datetime.timedelta(hours=1)
-            #candle_string_prev = str(pred_date) + 'T' + str(pred_time-td) + '-07:00'
             selected_candle_data = spy_db.get(candle_string)
             next_selected_candle_data = spy_db.get(next_candle_string)
             st.write(selected_candle_data)
@@ -407,13 +404,26 @@ def main():
 
             pred_date = st.date_input('Choose Date', datetime.date.today(), key='put_date')
             pred_time = st.selectbox('Choose Candle', ['06:30', '07:30', '08:30', '09:30', '10:30', '11:30', '12:30'], key='put_time_selection')
-            candle_string = str(pred_date) + 'T' + str(pred_time) + ':00-07:00'
-            # td = datetime.timedelta(hours=1)
-            # candle_string_prev = str(pred_date) + 'T' + str(pred_time-td) + '-07:00'
-            st.write(candle_string)
-            selected_candle_data = spy_db.get(candle_string)
-            st.write(selected_candle_data)
+            if pred_time == '06:30':
+                next_time = '07:30'
+            elif pred_time == '07:30':
+                next_time = '08:30'
+            elif pred_time == '08:30':
+                next_time = '09:30'
+            elif pred_time == '09:30':
+                next_time = '10:30'
+            elif pred_time == '10:30':
+                next_time = '11:30'
+            elif pred_time == '11:30':
+                next_time = '12:30'
+            else:
+                next_time = '12:30'
 
+            candle_string = str(pred_date) + 'T' + str(pred_time) + ':00-07:00'
+            next_candle_string = str(pred_date) + 'T' + str(next_time) + ':00-07:00'
+            selected_candle_data = spy_db.get(candle_string)
+            next_selected_candle_data = spy_db.get(next_candle_string)
+            st.write(selected_candle_data)
 
             if selected_candle_data is not None:
                 download = spy_models.get('put_dt_model.pkl')
@@ -433,6 +443,8 @@ def main():
 
                 if new_dt.predict(predictor_df) == 1:
                     st.write("ML Says Buy", " - ", close_price, " Target: ", close_price-0.5)
+                    if next_selected_candle_data['low'] > (close_price-0.4):
+                        st.write("Win", next_selected_candle_data['low'])
                 else:
                     st.write("ML Says Wait")
 
