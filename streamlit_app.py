@@ -385,7 +385,7 @@ def main():
 
                 if new_dt.predict(predictor_df) == 1:
                     st.write("ML Says Buy", " - ", close_price, " Target: ", close_price+0.5)
-                    if next_selected_candle_data['high'] > (close_price+0.4):
+                    if next_selected_candle_data['change_high_open'] > (close_price+0.4):
                         st.write("Win", next_selected_candle_data['high'])
                 else:
                     st.write("ML Says Wait")
@@ -443,7 +443,7 @@ def main():
 
                 if new_dt.predict(predictor_df) == 1:
                     st.write("ML Says Buy", " - ", close_price, " Target: ", close_price-0.5)
-                    if next_selected_candle_data['low'] > (close_price-0.4):
+                    if next_selected_candle_data['change_low_open'] < (-0.5):
                         st.write("Win", next_selected_candle_data['low'])
                 else:
                     st.write("ML Says Wait")
