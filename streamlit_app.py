@@ -217,9 +217,6 @@ def backtester(db_df, dt, spy_models):
         predictor_df = pd.DataFrame(data=row, index=[0]).values
         dt.predict(predictor_df)
 
-def was_it_win():
-
-
 
 def main():
     st.set_page_config(
