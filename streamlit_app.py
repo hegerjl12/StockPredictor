@@ -386,9 +386,9 @@ def main():
                 if new_dt.predict(predictor_df) == 1:
                     st.write("ML Says Buy", " - ", close_price, " Target: ", close_price+0.5)
                     if next_selected_candle_data['change_high_open'] > 0.4:
-                        st.write("Win: High - ", next_selected_candle_data['high'], " Low - ", next_selected_candle_data['low'])
+                        st.write("Win: High - ", next_selected_candle_data['high'], next_selected_candle_data['change_high_open'], " Low - ", next_selected_candle_data['low'], next_selected_candle_data['change_low_open'])
                     else:
-                        st.write("Loss: High - ", next_selected_candle_data['high'], " Low - ", next_selected_candle_data['low'])
+                        st.write("Loss: High - ", next_selected_candle_data['high'], next_selected_candle_data['change_high_open'], " Low - ", next_selected_candle_data['low'], next_selected_candle_data['change_low_open'])
                 else:
                     st.write("ML Says Wait")
 
@@ -446,9 +446,9 @@ def main():
                 if new_dt.predict(predictor_df) == 1:
                     st.write("ML Says Buy", " - ", close_price, " Target: ", close_price-0.5)
                     if next_selected_candle_data['change_low_open'] < -0.5:
-                        st.write("Win: Low - ", next_selected_candle_data['low'], " High - ", next_selected_candle_data['high'])
+                        st.write("Win: Low - ", next_selected_candle_data['low'], next_selected_candle_data['change_low_open'], " High - ", next_selected_candle_data['high'], next_selected_candle_data['change_high_open'])
                     else:
-                        st.write("Loss: Low - ", next_selected_candle_data['low'], " High - ", next_selected_candle_data['high'])
+                        st.write("Loss: Low - ", next_selected_candle_data['low'], next_selected_candle_data['change_low_open'], " High - ", next_selected_candle_data['high'], next_selected_candle_data['change_high_open'])
                 else:
                     st.write("ML Says Wait")
 
