@@ -423,8 +423,10 @@ def main():
 
             candle_string = str(pred_date) + 'T' + str(pred_time) + ':00-07:00'
             next_candle_string = str(pred_date) + 'T' + str(next_time) + ':00-07:00'
+            st.write(next_candle_string)
             selected_candle_data = spy_db.get(candle_string)
             next_selected_candle_data = spy_db.get(next_candle_string)
+            st.write(next_selected_candle_data)
             st.write(selected_candle_data)
 
             if selected_candle_data is not None:
