@@ -445,10 +445,11 @@ def main():
 
                 if new_dt.predict(predictor_df) == 1:
                     st.write("ML Says Buy", " - ", close_price, " Target: ", close_price-0.5)
-                    if (next_selected_candle_data is not None) and next_selected_candle_data['change_low_open'] < -0.5:
-                        st.write("Win: Low - ", next_selected_candle_data['low'], round(next_selected_candle_data['change_low_open'],2), " High - ", next_selected_candle_data['high'], round(next_selected_candle_data['change_high_open'],2))
-                    else:
-                        st.write("Loss: Low - ", next_selected_candle_data['low'], round(next_selected_candle_data['change_low_open'],2), " High - ", next_selected_candle_data['high'], round(next_selected_candle_data['change_high_open'],2))
+                    if (next_selected_candle_data is not None):
+                        if next_selected_candle_data['change_low_open'] < -0.5:
+                            st.write("Win: Low - ", next_selected_candle_data['low'], round(next_selected_candle_data['change_low_open'],2), " High - ", next_selected_candle_data['high'], round(next_selected_candle_data['change_high_open'],2))
+                        else:
+                            st.write("Loss: Low - ", next_selected_candle_data['low'], round(next_selected_candle_data['change_low_open'],2), " High - ", next_selected_candle_data['high'], round(next_selected_candle_data['change_high_open'],2))
                 else:
                     st.write("ML Says Wait")
 
