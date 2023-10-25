@@ -423,10 +423,8 @@ def main():
 
             candle_string = str(pred_date) + 'T' + str(pred_time) + ':00-07:00'
             next_candle_string = str(pred_date) + 'T' + str(next_time) + ':00-07:00'
-            st.write(next_candle_string)
             selected_candle_data = spy_db.get(candle_string)
             next_selected_candle_data = spy_db.get(next_candle_string)
-            st.write(next_selected_candle_data)
             st.write(selected_candle_data)
 
             if selected_candle_data is not None:
@@ -447,7 +445,7 @@ def main():
 
                 if new_dt.predict(predictor_df) == 1:
                     st.write("ML Says Buy", " - ", close_price, " Target: ", close_price-0.5)
-                    if next_selected_candle_data['change_low_open'] < -0.5:
+                    if (next_selected_candle_data is not None) and next_selected_candle_data['change_low_open'] < -0.5:
                         st.write("Win: Low - ", next_selected_candle_data['low'], round(next_selected_candle_data['change_low_open'],2), " High - ", next_selected_candle_data['high'], round(next_selected_candle_data['change_high_open'],2))
                     else:
                         st.write("Loss: Low - ", next_selected_candle_data['low'], round(next_selected_candle_data['change_low_open'],2), " High - ", next_selected_candle_data['high'], round(next_selected_candle_data['change_high_open'],2))
