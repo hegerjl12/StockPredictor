@@ -381,7 +381,7 @@ def main():
                     del selected_candle_data[key]
 
                 predictor_df = pd.DataFrame(data=selected_candle_data, index=[0]).values
-                #st.write(predictor_df)
+                st.write(predictor_df)
 
                 if new_dt.predict(predictor_df) == 1:
                     st.write("ML Says Buy", " - ", close_price, " Target: ", close_price+0.5)
