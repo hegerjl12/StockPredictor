@@ -28,7 +28,7 @@ def process_data(spy_db, newData_df):
 
 
     while last_entry is None:
-        candle_string = str(date_string) + "T" + list_of_times[i] + ":00-07:00"
+        candle_string = str(date_string) + "T" + list_of_times[i] + ":00-8:00"
         last_entry = spy_db.get(candle_string)
         if i == 6:
             date_string += datetime.timedelta(days=-1)
@@ -359,8 +359,8 @@ def main():
             else:
                 next_time = '12:30'
 
-            candle_string = str(pred_date) + 'T' + str(pred_time) + ':00-07:00'
-            next_candle_string = str(pred_date) + 'T' + str(next_time) + ':00-07:00'
+            candle_string = str(pred_date) + 'T' + str(pred_time) + ':00-8:00'
+            next_candle_string = str(pred_date) + 'T' + str(next_time) + ':00-08:00'
             selected_candle_data = spy_db.get(candle_string)
             next_selected_candle_data = spy_db.get(next_candle_string)
             st.write(selected_candle_data)
@@ -381,7 +381,7 @@ def main():
                     del selected_candle_data[key]
 
                 predictor_df = pd.DataFrame(data=selected_candle_data, index=[0]).values
-                st.write(predictor_df)
+                #st.write(predictor_df)
 
                 if new_dt.predict(predictor_df) == 1:
                     st.write("ML Says Buy", " - ", close_price, " Target: ", close_price+0.5)
@@ -421,8 +421,8 @@ def main():
             else:
                 next_time = '12:30'
 
-            candle_string = str(pred_date) + 'T' + str(pred_time) + ':00-07:00'
-            next_candle_string = str(pred_date) + 'T' + str(next_time) + ':00-07:00'
+            candle_string = str(pred_date) + 'T' + str(pred_time) + ':00-08:00'
+            next_candle_string = str(pred_date) + 'T' + str(next_time) + ':00-08:00'
             selected_candle_data = spy_db.get(candle_string)
             next_selected_candle_data = spy_db.get(next_candle_string)
             st.write(selected_candle_data)
