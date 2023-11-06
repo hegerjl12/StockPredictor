@@ -359,7 +359,7 @@ def main():
             else:
                 next_time = '12:30'
 
-            candle_string = str(pred_date) + 'T' + str(pred_time) + ':00-8:00'
+            candle_string = str(pred_date) + 'T' + str(pred_time) + ':00-08:00'
             next_candle_string = str(pred_date) + 'T' + str(next_time) + ':00-08:00'
             selected_candle_data = spy_db.get(candle_string)
             next_selected_candle_data = spy_db.get(next_candle_string)
