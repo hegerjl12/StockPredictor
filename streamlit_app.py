@@ -28,7 +28,7 @@ def process_data(spy_db, newData_df):
 
 
     while last_entry is None:
-        candle_string = str(date_string) + "T" + list_of_times[i] + ":00-8:00"
+        candle_string = str(date_string) + "T" + list_of_times[i] + ":00-08:00"
         last_entry = spy_db.get(candle_string)
         if i == 6:
             date_string += datetime.timedelta(days=-1)
