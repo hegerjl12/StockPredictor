@@ -372,7 +372,7 @@ def main():
 
                 candle_string = str(pred_date) + 'T' + str(time) + ':00-08:00'
                 next_candle_string = str(pred_date) + 'T' + str(next_time) + ':00-08:00'
-                selected_candle_data = spy_db.get(candle_string)
+                selected_candle_data = pd.DataFrame(spy_db.get(candle_string))
                 next_selected_candle_data = spy_db.get(next_candle_string)
                 st.dataframe(selected_candle_data.T)
 
