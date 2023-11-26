@@ -374,7 +374,8 @@ def main():
                 next_candle_string = str(pred_date) + 'T' + str(next_time) + ':00-08:00'
                 selected_candle_data = spy_db.get(candle_string)
                 next_selected_candle_data = spy_db.get(next_candle_string)
-                st.dataframe(pd.DataFrame(selected_candle_data).T)
+                view_transpose = pd.DataFrame(selected_candle_data)
+                st.dataframe(view_transpose.T)
 
 
                 if selected_candle_data is not None:
