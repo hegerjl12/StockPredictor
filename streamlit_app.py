@@ -347,22 +347,22 @@ def main():
             pred_time = ['06:30', '07:30', '08:30', '09:30', '10:30', '11:30', '12:30']
 
             for time in pred_time:
-                if pred_time == '06:30':
+                if time == '06:30':
                     next_time = '07:30'
-                elif pred_time == '07:30':
+                elif time == '07:30':
                     next_time = '08:30'
-                elif pred_time == '08:30':
+                elif time == '08:30':
                     next_time = '09:30'
-                elif pred_time == '09:30':
+                elif time == '09:30':
                     next_time = '10:30'
-                elif pred_time == '10:30':
+                elif time == '10:30':
                     next_time = '11:30'
-                elif pred_time == '11:30':
+                elif time == '11:30':
                     next_time = '12:30'
                 else:
                     next_time = '12:30'
 
-                candle_string = str(pred_date) + 'T' + str(pred_time) + ':00-08:00'
+                candle_string = str(pred_date) + 'T' + str(time) + ':00-08:00'
                 next_candle_string = str(pred_date) + 'T' + str(next_time) + ':00-08:00'
                 selected_candle_data = spy_db.get(candle_string)
                 next_selected_candle_data = spy_db.get(next_candle_string)
