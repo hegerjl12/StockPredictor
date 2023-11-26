@@ -11,7 +11,7 @@ from deta import Deta
 import pickle
 import datetime
 import matplotlib.pyplot as plt
-
+@st.cache_resource
 def connect_database():
     deta = Deta(st.secrets['DB_TOKEN'])
     spy_db = deta.Base('spy_db')
