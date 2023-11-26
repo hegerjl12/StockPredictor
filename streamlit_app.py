@@ -375,7 +375,7 @@ def main():
                 selected_candle_data = spy_db.get(candle_string)
                 next_selected_candle_data = spy_db.get(next_candle_string)
                 view_transpose = pd.DataFrame(selected_candle_data, index=[0])
-                st.dataframe(view_transpose.T)
+                st.dataframe(view_transpose)
 
 
                 if selected_candle_data is not None:
