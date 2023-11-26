@@ -408,60 +408,63 @@ def main():
         with PutTab:
 
             pred_date = st.date_input('Choose Date', datetime.date.today(), key='put_date')
-            pred_time = st.selectbox('Choose Candle', ['06:30', '07:30', '08:30', '09:30', '10:30', '11:30', '12:30'], key='put_time_selection')
-            if pred_time == '06:30':
-                next_time = '07:30'
-            elif pred_time == '07:30':
-                next_time = '08:30'
-            elif pred_time == '08:30':
-                next_time = '09:30'
-            elif pred_time == '09:30':
-                next_time = '10:30'
-            elif pred_time == '10:30':
-                next_time = '11:30'
-            elif pred_time == '11:30':
-                next_time = '12:30'
-            else:
-                next_time = '12:30'
+            #pred_time = st.selectbox('Choose Candle', ['06:30', '07:30', '08:30', '09:30', '10:30', '11:30', '12:30'], key='put_time_selection')
+            pred_time = ['06:30', '07:30', '08:30', '09:30', '10:30', '11:30', '12:30']
 
-            candle_string = str(pred_date) + 'T' + str(pred_time) + ':00-08:00'
-            next_candle_string = str(pred_date) + 'T' + str(next_time) + ':00-08:00'
-            selected_candle_data = spy_db.get(candle_string)
-            next_selected_candle_data = spy_db.get(next_candle_string)
-            st.write(selected_candle_data)
-
-            if selected_candle_data is not None:
-                download = spy_models.get('put_dt_model.pkl')
-                download2 = spy_models.get('put_dt1_model.pkl')
-                download3 = spy_models.get('put_rf1_model.pkl')
-                new_dt = pickle.loads(download.read())
-                new_dt2 = pickle.loads(download2.read())
-                new_rf3 = pickle.loads(download3.read())
-
-                close_price = selected_candle_data['close']
-                remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
-                for key in remove_list:
-                    del selected_candle_data[key]
-
-                predictor_df = pd.DataFrame(data=selected_candle_data, index=[0]).values
-                #st.write(predictor_df)
-
-                if new_dt.predict(predictor_df) == 1:
-                    st.write("ML Says Buy", " - ", close_price, " Target: ", close_price-0.5)
-                    if (next_selected_candle_data is not None):
-                        if next_selected_candle_data['change_low_open'] < -0.5:
-                            st.write("Win: Low - ", next_selected_candle_data['low'], round(next_selected_candle_data['change_low_open'],2), " High - ", next_selected_candle_data['high'], round(next_selected_candle_data['change_high_open'],2))
-                        else:
-                            st.write("Loss: Low - ", next_selected_candle_data['low'], round(next_selected_candle_data['change_low_open'],2), " High - ", next_selected_candle_data['high'], round(next_selected_candle_data['change_high_open'],2))
+            for time in pred_time:
+                if time == '06:30':
+                    next_time = '07:30'
+                elif time == '07:30':
+                    next_time = '08:30'
+                elif time == '08:30':
+                    next_time = '09:30'
+                elif time == '09:30':
+                    next_time = '10:30'
+                elif time == '10:30':
+                    next_time = '11:30'
+                elif time == '11:30':
+                    next_time = '12:30'
                 else:
-                    st.write("ML Says Wait")
+                    next_time = '12:30'
 
-                if new_dt2.predict(predictor_df) == 1:
-                    st.write("ML NEW 50 Says Buy")
-                    pred_price = new_rf3.predict(predictor_df)
-                    st.write("Predicted Price: ", round((close_price+float(pred_price)), 2))
-                else:
-                    st.write("ML NEW 50 Says Wait")
+                candle_string = str(pred_date) + 'T' + str(time) + ':00-08:00'
+                next_candle_string = str(pred_date) + 'T' + str(next_time) + ':00-08:00'
+                selected_candle_data = spy_db.get(candle_string)
+                next_selected_candle_data = spy_db.get(next_candle_string)
+                st.write(selected_candle_data)
+
+                if selected_candle_data is not None:
+                    download = spy_models.get('put_dt_model.pkl')
+                    download2 = spy_models.get('put_dt1_model.pkl')
+                    download3 = spy_models.get('put_rf1_model.pkl')
+                    new_dt = pickle.loads(download.read())
+                    new_dt2 = pickle.loads(download2.read())
+                    new_rf3 = pickle.loads(download3.read())
+
+                    close_price = selected_candle_data['close']
+                    remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
+                    for key in remove_list:
+                        del selected_candle_data[key]
+
+                    predictor_df = pd.DataFrame(data=selected_candle_data, index=[0]).values
+                    #st.write(predictor_df)
+
+                    if new_dt.predict(predictor_df) == 1:
+                        st.write("ML Says Buy", " - ", close_price, " Target: ", close_price-0.5)
+                        if (next_selected_candle_data is not None):
+                            if next_selected_candle_data['change_low_open'] < -0.5:
+                                st.write("Win: Low - ", next_selected_candle_data['low'], round(next_selected_candle_data['change_low_open'],2), " High - ", next_selected_candle_data['high'], round(next_selected_candle_data['change_high_open'],2))
+                            else:
+                                st.write("Loss: Low - ", next_selected_candle_data['low'], round(next_selected_candle_data['change_low_open'],2), " High - ", next_selected_candle_data['high'], round(next_selected_candle_data['change_high_open'],2))
+                    else:
+                        st.write("ML Says Wait")
+
+                    if new_dt2.predict(predictor_df) == 1:
+                        st.write("ML NEW 50 Says Buy")
+                        pred_price = new_rf3.predict(predictor_df)
+                        st.write("Predicted Price: ", round((close_price+float(pred_price)), 2))
+                    else:
+                        st.write("ML NEW 50 Says Wait")
 
 
 
