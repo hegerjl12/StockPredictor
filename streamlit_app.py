@@ -342,6 +342,14 @@ def main():
 
         with CallTab:
 
+
+            c_download = spy_models.get('call_dt_model.pkl')
+            c_download2 = spy_models.get('dt1_model.pkl')
+            c_download3 = spy_models.get('rf1_model.pkl')
+            c_new_dt = pickle.loads(c_download.read())
+            c_new_dt2 = pickle.loads(c_download2.read())
+            c_new_rf3 = pickle.loads(c_download3.read())
+
             pred_date = st.date_input('Choose Date', datetime.date.today(), key='call_date')
             #pred_time = st.selectbox('Choose Candle', ['06:30', '07:30', '08:30', '09:30', '10:30', '11:30', '12:30'], key='call_time_selction')
             pred_time = ['06:30', '07:30', '08:30', '09:30', '10:30', '11:30', '12:30']
@@ -370,12 +378,12 @@ def main():
 
 
                 if selected_candle_data is not None:
-                    download = spy_models.get('call_dt_model.pkl')
-                    download2 = spy_models.get('dt1_model.pkl')
-                    download3 = spy_models.get('rf1_model.pkl')
-                    new_dt = pickle.loads(download.read())
-                    new_dt2 = pickle.loads(download2.read())
-                    new_rf3 = pickle.loads(download3.read())
+                #     download = spy_models.get('call_dt_model.pkl')
+                #     download2 = spy_models.get('dt1_model.pkl')
+                #     download3 = spy_models.get('rf1_model.pkl')
+                #     new_dt = pickle.loads(download.read())
+                #     new_dt2 = pickle.loads(download2.read())
+                #     new_rf3 = pickle.loads(download3.read())
 
 
                     close_price = selected_candle_data['close']
@@ -386,7 +394,7 @@ def main():
                     predictor_df = pd.DataFrame(data=selected_candle_data, index=[0]).values
                     #st.write(predictor_df)
 
-                    if new_dt.predict(predictor_df) == 1:
+                    if c_new_dt.predict(predictor_df) == 1:
                         st.write("ML Says Buy", " - ", close_price, " Target: ", close_price+0.5)
                         if next_selected_candle_data['change_high_open'] > 0.4:
                             st.write("Win: High - ", next_selected_candle_data['high'], round(next_selected_candle_data['change_high_open'],2), " Low - ", next_selected_candle_data['low'], round(next_selected_candle_data['change_low_open'],2))
@@ -395,9 +403,9 @@ def main():
                     else:
                         st.write("ML Says Wait")
 
-                    if new_dt2.predict(predictor_df) == 1:
+                    if c_new_dt2.predict(predictor_df) == 1:
                         st.write("ML NEW 50 Says Buy")
-                        pred_price = new_rf3.predict(predictor_df)
+                        pred_price = c_new_rf3.predict(predictor_df)
                         st.write("Predicted Price: ", round((close_price+float(pred_price)),2))
                     else:
                         st.write("ML NEW 50 Says Wait")
@@ -406,6 +414,13 @@ def main():
 
 
         with PutTab:
+
+            p_download = spy_models.get('put_dt_model.pkl')
+            p_download2 = spy_models.get('put_dt1_model.pkl')
+            p_download3 = spy_models.get('put_rf1_model.pkl')
+            p_new_dt = pickle.loads(p_download.read())
+            p_new_dt2 = pickle.loads(p_download2.read())
+            p_new_rf3 = pickle.loads(p_download3.read())
 
             pred_date = st.date_input('Choose Date', datetime.date.today(), key='put_date')
             #pred_time = st.selectbox('Choose Candle', ['06:30', '07:30', '08:30', '09:30', '10:30', '11:30', '12:30'], key='put_time_selection')
@@ -434,12 +449,12 @@ def main():
                 st.write(selected_candle_data)
 
                 if selected_candle_data is not None:
-                    download = spy_models.get('put_dt_model.pkl')
-                    download2 = spy_models.get('put_dt1_model.pkl')
-                    download3 = spy_models.get('put_rf1_model.pkl')
-                    new_dt = pickle.loads(download.read())
-                    new_dt2 = pickle.loads(download2.read())
-                    new_rf3 = pickle.loads(download3.read())
+                #     download = spy_models.get('put_dt_model.pkl')
+                #     download2 = spy_models.get('put_dt1_model.pkl')
+                #     download3 = spy_models.get('put_rf1_model.pkl')
+                #     new_dt = pickle.loads(download.read())
+                #     new_dt2 = pickle.loads(download2.read())
+                #     new_rf3 = pickle.loads(download3.read())
 
                     close_price = selected_candle_data['close']
                     remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
@@ -449,7 +464,7 @@ def main():
                     predictor_df = pd.DataFrame(data=selected_candle_data, index=[0]).values
                     #st.write(predictor_df)
 
-                    if new_dt.predict(predictor_df) == 1:
+                    if p_new_dt.predict(predictor_df) == 1:
                         st.write("ML Says Buy", " - ", close_price, " Target: ", close_price-0.5)
                         if (next_selected_candle_data is not None):
                             if next_selected_candle_data['change_low_open'] < -0.5:
@@ -459,9 +474,9 @@ def main():
                     else:
                         st.write("ML Says Wait")
 
-                    if new_dt2.predict(predictor_df) == 1:
+                    if p_new_dt2.predict(predictor_df) == 1:
                         st.write("ML NEW 50 Says Buy")
-                        pred_price = new_rf3.predict(predictor_df)
+                        pred_price = p_new_rf3.predict(predictor_df)
                         st.write("Predicted Price: ", round((close_price+float(pred_price)), 2))
                     else:
                         st.write("ML NEW 50 Says Wait")
