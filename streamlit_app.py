@@ -11,13 +11,21 @@ from deta import Deta
 import pickle
 import datetime
 import matplotlib.pyplot as plt
+
+if 'deta' not in st.session_state:
+    st.session_state.deta = ''
+if 'spy_db' not in st.session_state:
+    st.session_state.spy_db = None
+if 'spy_models' not in st.session_state:
+    st.session_state.spy_models = None
+
 @st.cache_resource
 def connect_database():
-    deta = Deta(st.secrets['DB_TOKEN'])
-    spy_db = deta.Base('spy_db')
-    spy_models = deta.Drive('spy_models')
+    st.session_state.deta = Deta(st.secrets['DB_TOKEN'])
+    st.session_state.spy_db = st.session_state.deta.Base('spy_db')
+    st.session_state.spy_models = st.session_state.deta.Drive('spy_models')
 
-    return deta, spy_db, spy_models
+    #return deta, spy_db, spy_models
 
 def process_data(spy_db, newData_df):
 
@@ -225,8 +233,8 @@ def main():
         layout="wide",)
 
     with st.spinner('Connecting Database'):
-        deta, spy_db, spy_models = connect_database()
-
+        #deta, spy_db, spy_models = connect_database()
+        connect_database()
         newDataTab, modelsTab, predictorTab = st.tabs(['Upload Data', 'Train and Save Models', 'Predictions'])
 
 
@@ -239,11 +247,11 @@ def main():
             fileUpload = st.file_uploader('Upload SPY 1 HR Chart Data', type='csv')
 
             if st.button('Create DB Backup'):
-                res = spy_db.fetch()
+                res = st.session_state.spy_db.fetch()
                 allItems = res.items
 
                 while res.last:
-                    res = spy_db.fetch(last=res.last)
+                    res = st.session_state.spy_db.fetch(last=res.last)
                     allItems += res.items
 
                 db_df = pd.DataFrame(allItems)
@@ -260,7 +268,7 @@ def main():
             if fileUpload is not None:
                 newData_df = pd.read_csv(fileUpload)
 
-                spy_df = process_data(spy_db, newData_df)
+                spy_df = process_data(st.session_state.spy_db, newData_df)
                 # # trim the upload to just columns we care about
                 # spy_df = newData_df[
                 #     ['time', 'open', 'high', 'low', 'close', 'Momemtum', 'Slow Pressure', 'Fast Pressure']].copy()
@@ -287,7 +295,7 @@ def main():
                 #
                 # spy_df.drop(index=spy_df.index[0], axis=0, inplace=True)
 
-                add_new_data_to_database(spy_db, spy_df)
+                add_new_data_to_database(st.session_state.spy_db, spy_df)
                 # # Add the rows to the DB
                 # for index, row in spy_df.iterrows():
                 #     spy_db.put({'time': row['time'], 'open': row['open'], 'high': row['high'], 'low': row['low'],
@@ -309,11 +317,11 @@ def main():
             drawdownInput = st.slider('Choose a Drawdown Threshold', -0.5, 0.5, step=0.1, value=-0.4)
 
             if st.button('Generate Model'):
-                res = spy_db.fetch()
+                res = st.session_state.spy_db.fetch()
                 allItems = res.items
 
                 while res.last:
-                    res = spy_db.fetch(last=res.last)
+                    res = st.session_state.spy_db.fetch(last=res.last)
                     allItems += res.items
 
                 db_df = pd.DataFrame(allItems)
@@ -346,9 +354,9 @@ def main():
             with CallTab:
 
 
-                c_download = spy_models.get('call_dt_model.pkl')
-                c_download2 = spy_models.get('dt1_model.pkl')
-                c_download3 = spy_models.get('rf1_model.pkl')
+                c_download = st.session_state.spy_models.get('call_dt_model.pkl')
+                c_download2 = st.session_state.spy_models.get('dt1_model.pkl')
+                c_download3 = st.session_state.spy_models.get('rf1_model.pkl')
                 c_new_dt = pickle.loads(c_download.read())
                 c_new_dt2 = pickle.loads(c_download2.read())
                 c_new_rf3 = pickle.loads(c_download3.read())
@@ -375,8 +383,8 @@ def main():
 
                     candle_string = str(pred_date) + 'T' + str(time) + ':00-08:00'
                     next_candle_string = str(pred_date) + 'T' + str(next_time) + ':00-08:00'
-                    selected_candle_data = spy_db.get(candle_string)
-                    next_selected_candle_data = spy_db.get(next_candle_string)
+                    selected_candle_data = st.session_state.spy_db.get(candle_string)
+                    next_selected_candle_data = st.session_state.spy_db.get(next_candle_string)
                     st.dataframe(data=(pd.DataFrame(selected_candle_data, index=[0])),hide_index=True)
 
 
@@ -418,9 +426,9 @@ def main():
 
             with PutTab:
 
-                p_download = spy_models.get('put_dt_model.pkl')
-                p_download2 = spy_models.get('put_dt1_model.pkl')
-                p_download3 = spy_models.get('put_rf1_model.pkl')
+                p_download = st.session_state.spy_models.get('put_dt_model.pkl')
+                p_download2 = st.session_state.spy_models.get('put_dt1_model.pkl')
+                p_download3 = st.session_state.spy_models.get('put_rf1_model.pkl')
                 p_new_dt = pickle.loads(p_download.read())
                 p_new_dt2 = pickle.loads(p_download2.read())
                 p_new_rf3 = pickle.loads(p_download3.read())
@@ -447,8 +455,8 @@ def main():
 
                     candle_string = str(pred_date) + 'T' + str(time) + ':00-08:00'
                     next_candle_string = str(pred_date) + 'T' + str(next_time) + ':00-08:00'
-                    selected_candle_data = spy_db.get(candle_string)
-                    next_selected_candle_data = spy_db.get(next_candle_string)
+                    selected_candle_data = st.session_state.spy_db.get(candle_string)
+                    next_selected_candle_data = st.session_state.spy_db.get(next_candle_string)
                     st.dataframe(data=(pd.DataFrame(selected_candle_data, index=[0])),hide_index=True)
 
                     if selected_candle_data is not None:
