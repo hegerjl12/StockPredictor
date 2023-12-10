@@ -224,263 +224,265 @@ def main():
         page_icon="🤑",
         layout="wide",)
 
-    newDataTab, modelsTab, predictorTab = st.tabs(['Upload Data', 'Train and Save Models', 'Predictions'])
+    with st.spinner('Connecting Database'):
+        deta, spy_db, spy_models = connect_database()
 
-    deta, spy_db, spy_models = connect_database()
-    # deta = Deta(st.secrets['DB_TOKEN'])
-    # spy_db = deta.Base('spy_db')
-    # spy_models = deta.Drive('spy_models')
+        newDataTab, modelsTab, predictorTab = st.tabs(['Upload Data', 'Train and Save Models', 'Predictions'])
 
-    with newDataTab:
-        # Upload a csv export file
-        fileUpload = st.file_uploader('Upload SPY 1 HR Chart Data', type='csv')
 
-        if st.button('Create DB Backup'):
-            res = spy_db.fetch()
-            allItems = res.items
+        # deta = Deta(st.secrets['DB_TOKEN'])
+        # spy_db = deta.Base('spy_db')
+        # spy_models = deta.Drive('spy_models')
 
-            while res.last:
-                res = spy_db.fetch(last=res.last)
-                allItems += res.items
+        with newDataTab:
+            # Upload a csv export file
+            fileUpload = st.file_uploader('Upload SPY 1 HR Chart Data', type='csv')
 
-            db_df = pd.DataFrame(allItems)
+            if st.button('Create DB Backup'):
+                res = spy_db.fetch()
+                allItems = res.items
 
-            csv = db_df.to_csv().encode('utf-8')
+                while res.last:
+                    res = spy_db.fetch(last=res.last)
+                    allItems += res.items
 
-            st.download_button(
-                label='Download DB Backup',
-                data=csv,
-                file_name=datetime.date.today().strftime('%m-%d-%Y')+'.csv',
-                mime='text/csv',
+                db_df = pd.DataFrame(allItems)
+
+                csv = db_df.to_csv().encode('utf-8')
+
+                st.download_button(
+                    label='Download DB Backup',
+                    data=csv,
+                    file_name=datetime.date.today().strftime('%m-%d-%Y')+'.csv',
+                    mime='text/csv',
+                )
+
+            if fileUpload is not None:
+                newData_df = pd.read_csv(fileUpload)
+
+                spy_df = process_data(spy_db, newData_df)
+                # # trim the upload to just columns we care about
+                # spy_df = newData_df[
+                #     ['time', 'open', 'high', 'low', 'close', 'Momemtum', 'Slow Pressure', 'Fast Pressure']].copy()
+                #
+                # spy_df['change_close_open'] = spy_df['close'] - spy_df['open']
+                # spy_df['change_high_open'] = spy_df['high'] - spy_df['open']
+                # spy_df['change_low_open'] = spy_df['low'] - spy_df['open']
+                #
+                # # add column for the deltas for momentum, sp, fp
+                # m_delta = [0]
+                # sp_delta = [0]
+                # fp_delta = [0]
+                #
+                # for i in range(len(spy_df['Momemtum'])):
+                #
+                #     if i < len(spy_df['Momemtum']) - 1:
+                #         m_delta.append(spy_df.loc[i + 1, 'Momemtum'] - spy_df.loc[i, 'Momemtum'])
+                #         sp_delta.append(spy_df.loc[i + 1, 'Slow Pressure'] - spy_df.loc[i, 'Slow Pressure'])
+                #         fp_delta.append(spy_df.loc[i + 1, 'Fast Pressure'] - spy_df.loc[i, 'Fast Pressure'])
+                #
+                # spy_df['m_delta'] = m_delta
+                # spy_df['sp_delta'] = sp_delta
+                # spy_df['fp_delta'] = fp_delta
+                #
+                # spy_df.drop(index=spy_df.index[0], axis=0, inplace=True)
+
+                add_new_data_to_database(spy_db, spy_df)
+                # # Add the rows to the DB
+                # for index, row in spy_df.iterrows():
+                #     spy_db.put({'time': row['time'], 'open': row['open'], 'high': row['high'], 'low': row['low'],
+                #                 'close': row['close'], 'Momemtum': row['Momemtum'], 'Slow Pressure': row['Slow Pressure'],
+                #                 'Fast Pressure': row['Fast Pressure'], 'm_delta': row['m_delta'],
+                #                 'sp_delta': row['sp_delta'], 'fp_delta': row['fp_delta'],
+                #                 'change_close_open': row['change_close_open'], 'change_high_open': row['change_high_open'],
+                #                 'change_low_open': row['change_low_open']}, key=row['time'])
+
+        with modelsTab:
+
+            calls_or_puts = st.radio(
+                'Choose to build a model for calls or puts',
+                key='calls_or_puts',
+                options=['Calls', 'Puts'],
             )
 
-        if fileUpload is not None:
-            newData_df = pd.read_csv(fileUpload)
+            winInput = st.slider('Choose a Win Threshold', -1.0, 1.0, step=0.1, value=0.5)
+            drawdownInput = st.slider('Choose a Drawdown Threshold', -0.5, 0.5, step=0.1, value=-0.4)
 
-            spy_df = process_data(spy_db, newData_df)
-            # # trim the upload to just columns we care about
-            # spy_df = newData_df[
-            #     ['time', 'open', 'high', 'low', 'close', 'Momemtum', 'Slow Pressure', 'Fast Pressure']].copy()
-            #
-            # spy_df['change_close_open'] = spy_df['close'] - spy_df['open']
-            # spy_df['change_high_open'] = spy_df['high'] - spy_df['open']
-            # spy_df['change_low_open'] = spy_df['low'] - spy_df['open']
-            #
-            # # add column for the deltas for momentum, sp, fp
-            # m_delta = [0]
-            # sp_delta = [0]
-            # fp_delta = [0]
-            #
-            # for i in range(len(spy_df['Momemtum'])):
-            #
-            #     if i < len(spy_df['Momemtum']) - 1:
-            #         m_delta.append(spy_df.loc[i + 1, 'Momemtum'] - spy_df.loc[i, 'Momemtum'])
-            #         sp_delta.append(spy_df.loc[i + 1, 'Slow Pressure'] - spy_df.loc[i, 'Slow Pressure'])
-            #         fp_delta.append(spy_df.loc[i + 1, 'Fast Pressure'] - spy_df.loc[i, 'Fast Pressure'])
-            #
-            # spy_df['m_delta'] = m_delta
-            # spy_df['sp_delta'] = sp_delta
-            # spy_df['fp_delta'] = fp_delta
-            #
-            # spy_df.drop(index=spy_df.index[0], axis=0, inplace=True)
+            if st.button('Generate Model'):
+                res = spy_db.fetch()
+                allItems = res.items
 
-            add_new_data_to_database(spy_db, spy_df)
-            # # Add the rows to the DB
-            # for index, row in spy_df.iterrows():
-            #     spy_db.put({'time': row['time'], 'open': row['open'], 'high': row['high'], 'low': row['low'],
-            #                 'close': row['close'], 'Momemtum': row['Momemtum'], 'Slow Pressure': row['Slow Pressure'],
-            #                 'Fast Pressure': row['Fast Pressure'], 'm_delta': row['m_delta'],
-            #                 'sp_delta': row['sp_delta'], 'fp_delta': row['fp_delta'],
-            #                 'change_close_open': row['change_close_open'], 'change_high_open': row['change_high_open'],
-            #                 'change_low_open': row['change_low_open']}, key=row['time'])
+                while res.last:
+                    res = spy_db.fetch(last=res.last)
+                    allItems += res.items
 
-    with modelsTab:
-
-        calls_or_puts = st.radio(
-            'Choose to build a model for calls or puts',
-            key='calls_or_puts',
-            options=['Calls', 'Puts'],
-        )
-
-        winInput = st.slider('Choose a Win Threshold', -1.0, 1.0, step=0.1, value=0.5)
-        drawdownInput = st.slider('Choose a Drawdown Threshold', -0.5, 0.5, step=0.1, value=-0.4)
-
-        if st.button('Generate Model'):
-            res = spy_db.fetch()
-            allItems = res.items
-
-            while res.last:
-                res = spy_db.fetch(last=res.last)
-                allItems += res.items
-
-            db_df = pd.DataFrame(allItems)
+                db_df = pd.DataFrame(allItems)
 
 
-            if calls_or_puts == 'Calls':
+                if calls_or_puts == 'Calls':
 
-                dt = create_call_model(db_df, winInput, drawdownInput)
+                    dt = create_call_model(db_df, winInput, drawdownInput)
 
-                st.download_button(
-                    "Download Model",
-                    data=pickle.dumps(dt),
-                    file_name="dt_model.pkl",
-                )
+                    st.download_button(
+                        "Download Model",
+                        data=pickle.dumps(dt),
+                        file_name="dt_model.pkl",
+                    )
 
-            if calls_or_puts == 'Puts':
+                if calls_or_puts == 'Puts':
 
-                dt = create_put_model(db_df, winInput, drawdownInput)
+                    dt = create_put_model(db_df, winInput, drawdownInput)
 
-                st.download_button(
-                    "Download Model",
-                    data=pickle.dumps(dt),
-                    file_name="dt_model.pkl",
-                )
+                    st.download_button(
+                        "Download Model",
+                        data=pickle.dumps(dt),
+                        file_name="dt_model.pkl",
+                    )
 
-    with predictorTab:
+        with predictorTab:
 
-        CallTab, PutTab = st.tabs(['Calls', 'Puts'])
+            CallTab, PutTab = st.tabs(['Calls', 'Puts'])
 
-        with CallTab:
-
-
-            c_download = spy_models.get('call_dt_model.pkl')
-            c_download2 = spy_models.get('dt1_model.pkl')
-            c_download3 = spy_models.get('rf1_model.pkl')
-            c_new_dt = pickle.loads(c_download.read())
-            c_new_dt2 = pickle.loads(c_download2.read())
-            c_new_rf3 = pickle.loads(c_download3.read())
-
-            pred_date = st.date_input('Choose Date', datetime.date.today(), key='call_date')
-            #pred_time = st.selectbox('Choose Candle', ['06:30', '07:30', '08:30', '09:30', '10:30', '11:30', '12:30'], key='call_time_selction')
-            pred_time = ['06:30', '07:30', '08:30', '09:30', '10:30', '11:30', '12:30']
-
-            for time in pred_time:
-                if time == '06:30':
-                    next_time = '07:30'
-                elif time == '07:30':
-                    next_time = '08:30'
-                elif time == '08:30':
-                    next_time = '09:30'
-                elif time == '09:30':
-                    next_time = '10:30'
-                elif time == '10:30':
-                    next_time = '11:30'
-                elif time == '11:30':
-                    next_time = '12:30'
-                else:
-                    next_time = '12:30'
-
-                candle_string = str(pred_date) + 'T' + str(time) + ':00-08:00'
-                next_candle_string = str(pred_date) + 'T' + str(next_time) + ':00-08:00'
-                selected_candle_data = spy_db.get(candle_string)
-                next_selected_candle_data = spy_db.get(next_candle_string)
-                st.dataframe(data=(pd.DataFrame(selected_candle_data, index=[0])),hide_index=True)
+            with CallTab:
 
 
-                if selected_candle_data is not None:
-                #     download = spy_models.get('call_dt_model.pkl')
-                #     download2 = spy_models.get('dt1_model.pkl')
-                #     download3 = spy_models.get('rf1_model.pkl')
-                #     new_dt = pickle.loads(download.read())
-                #     new_dt2 = pickle.loads(download2.read())
-                #     new_rf3 = pickle.loads(download3.read())
+                c_download = spy_models.get('call_dt_model.pkl')
+                c_download2 = spy_models.get('dt1_model.pkl')
+                c_download3 = spy_models.get('rf1_model.pkl')
+                c_new_dt = pickle.loads(c_download.read())
+                c_new_dt2 = pickle.loads(c_download2.read())
+                c_new_rf3 = pickle.loads(c_download3.read())
 
+                pred_date = st.date_input('Choose Date', datetime.date.today(), key='call_date')
+                #pred_time = st.selectbox('Choose Candle', ['06:30', '07:30', '08:30', '09:30', '10:30', '11:30', '12:30'], key='call_time_selction')
+                pred_time = ['06:30', '07:30', '08:30', '09:30', '10:30', '11:30', '12:30']
 
-                    close_price = selected_candle_data['close']
-                    remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
-                    for key in remove_list:
-                        del selected_candle_data[key]
-
-                    predictor_df = pd.DataFrame(data=selected_candle_data, index=[0]).values
-                    #st.write(predictor_df)
-
-                    if c_new_dt.predict(predictor_df) == 1:
-                        st.write("ML Says Buy", " - ", close_price, " Target: ", close_price+0.5)
-                        if next_selected_candle_data['change_high_open'] > 0.4:
-                            st.write("Win: High - ", next_selected_candle_data['high'], round(next_selected_candle_data['change_high_open'],2), " Low - ", next_selected_candle_data['low'], round(next_selected_candle_data['change_low_open'],2))
-                        else:
-                            st.write("Loss: High - ", next_selected_candle_data['high'], round(next_selected_candle_data['change_high_open'],2), " Low - ", next_selected_candle_data['low'], round(next_selected_candle_data['change_low_open'],2))
+                for time in pred_time:
+                    if time == '06:30':
+                        next_time = '07:30'
+                    elif time == '07:30':
+                        next_time = '08:30'
+                    elif time == '08:30':
+                        next_time = '09:30'
+                    elif time == '09:30':
+                        next_time = '10:30'
+                    elif time == '10:30':
+                        next_time = '11:30'
+                    elif time == '11:30':
+                        next_time = '12:30'
                     else:
-                        st.write("ML Says Wait")
+                        next_time = '12:30'
 
-                    if c_new_dt2.predict(predictor_df) == 1:
-                        st.write("ML NEW 50 Says Buy")
-                        pred_price = c_new_rf3.predict(predictor_df)
-                        st.write("Predicted Price: ", round((close_price+float(pred_price)),2))
-                    else:
-                        st.write("ML NEW 50 Says Wait")
-
+                    candle_string = str(pred_date) + 'T' + str(time) + ':00-08:00'
+                    next_candle_string = str(pred_date) + 'T' + str(next_time) + ':00-08:00'
+                    selected_candle_data = spy_db.get(candle_string)
+                    next_selected_candle_data = spy_db.get(next_candle_string)
+                    st.dataframe(data=(pd.DataFrame(selected_candle_data, index=[0])),hide_index=True)
 
 
+                    if selected_candle_data is not None:
+                    #     download = spy_models.get('call_dt_model.pkl')
+                    #     download2 = spy_models.get('dt1_model.pkl')
+                    #     download3 = spy_models.get('rf1_model.pkl')
+                    #     new_dt = pickle.loads(download.read())
+                    #     new_dt2 = pickle.loads(download2.read())
+                    #     new_rf3 = pickle.loads(download3.read())
 
-        with PutTab:
 
-            p_download = spy_models.get('put_dt_model.pkl')
-            p_download2 = spy_models.get('put_dt1_model.pkl')
-            p_download3 = spy_models.get('put_rf1_model.pkl')
-            p_new_dt = pickle.loads(p_download.read())
-            p_new_dt2 = pickle.loads(p_download2.read())
-            p_new_rf3 = pickle.loads(p_download3.read())
+                        close_price = selected_candle_data['close']
+                        remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
+                        for key in remove_list:
+                            del selected_candle_data[key]
 
-            pred_date = st.date_input('Choose Date', datetime.date.today(), key='put_date')
-            #pred_time = st.selectbox('Choose Candle', ['06:30', '07:30', '08:30', '09:30', '10:30', '11:30', '12:30'], key='put_time_selection')
-            pred_time = ['06:30', '07:30', '08:30', '09:30', '10:30', '11:30', '12:30']
+                        predictor_df = pd.DataFrame(data=selected_candle_data, index=[0]).values
+                        #st.write(predictor_df)
 
-            for time in pred_time:
-                if time == '06:30':
-                    next_time = '07:30'
-                elif time == '07:30':
-                    next_time = '08:30'
-                elif time == '08:30':
-                    next_time = '09:30'
-                elif time == '09:30':
-                    next_time = '10:30'
-                elif time == '10:30':
-                    next_time = '11:30'
-                elif time == '11:30':
-                    next_time = '12:30'
-                else:
-                    next_time = '12:30'
-
-                candle_string = str(pred_date) + 'T' + str(time) + ':00-08:00'
-                next_candle_string = str(pred_date) + 'T' + str(next_time) + ':00-08:00'
-                selected_candle_data = spy_db.get(candle_string)
-                next_selected_candle_data = spy_db.get(next_candle_string)
-                st.dataframe(data=(pd.DataFrame(selected_candle_data, index=[0])),hide_index=True)
-
-                if selected_candle_data is not None:
-                #     download = spy_models.get('put_dt_model.pkl')
-                #     download2 = spy_models.get('put_dt1_model.pkl')
-                #     download3 = spy_models.get('put_rf1_model.pkl')
-                #     new_dt = pickle.loads(download.read())
-                #     new_dt2 = pickle.loads(download2.read())
-                #     new_rf3 = pickle.loads(download3.read())
-
-                    close_price = selected_candle_data['close']
-                    remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
-                    for key in remove_list:
-                        del selected_candle_data[key]
-
-                    predictor_df = pd.DataFrame(data=selected_candle_data, index=[0]).values
-                    #st.write(predictor_df)
-
-                    if p_new_dt.predict(predictor_df) == 1:
-                        st.write("ML Says Buy", " - ", close_price, " Target: ", close_price-0.5)
-                        if (next_selected_candle_data is not None):
-                            if next_selected_candle_data['change_low_open'] < -0.5:
-                                st.write("Win: Low - ", next_selected_candle_data['low'], round(next_selected_candle_data['change_low_open'],2), " High - ", next_selected_candle_data['high'], round(next_selected_candle_data['change_high_open'],2))
+                        if c_new_dt.predict(predictor_df) == 1:
+                            st.write("ML Says Buy", " - ", close_price, " Target: ", close_price+0.5)
+                            if next_selected_candle_data['change_high_open'] > 0.4:
+                                st.write("Win: High - ", next_selected_candle_data['high'], round(next_selected_candle_data['change_high_open'],2), " Low - ", next_selected_candle_data['low'], round(next_selected_candle_data['change_low_open'],2))
                             else:
-                                st.write("Loss: Low - ", next_selected_candle_data['low'], round(next_selected_candle_data['change_low_open'],2), " High - ", next_selected_candle_data['high'], round(next_selected_candle_data['change_high_open'],2))
-                    else:
-                        st.write("ML Says Wait")
+                                st.write("Loss: High - ", next_selected_candle_data['high'], round(next_selected_candle_data['change_high_open'],2), " Low - ", next_selected_candle_data['low'], round(next_selected_candle_data['change_low_open'],2))
+                        else:
+                            st.write("ML Says Wait")
 
-                    if p_new_dt2.predict(predictor_df) == 1:
-                        st.write("ML NEW 50 Says Buy")
-                        pred_price = p_new_rf3.predict(predictor_df)
-                        st.write("Predicted Price: ", round((close_price+float(pred_price)), 2))
-                    else:
-                        st.write("ML NEW 50 Says Wait")
+                        if c_new_dt2.predict(predictor_df) == 1:
+                            st.write("ML NEW 50 Says Buy")
+                            pred_price = c_new_rf3.predict(predictor_df)
+                            st.write("Predicted Price: ", round((close_price+float(pred_price)),2))
+                        else:
+                            st.write("ML NEW 50 Says Wait")
 
+
+
+
+            with PutTab:
+
+                p_download = spy_models.get('put_dt_model.pkl')
+                p_download2 = spy_models.get('put_dt1_model.pkl')
+                p_download3 = spy_models.get('put_rf1_model.pkl')
+                p_new_dt = pickle.loads(p_download.read())
+                p_new_dt2 = pickle.loads(p_download2.read())
+                p_new_rf3 = pickle.loads(p_download3.read())
+
+                pred_date = st.date_input('Choose Date', datetime.date.today(), key='put_date')
+                #pred_time = st.selectbox('Choose Candle', ['06:30', '07:30', '08:30', '09:30', '10:30', '11:30', '12:30'], key='put_time_selection')
+                pred_time = ['06:30', '07:30', '08:30', '09:30', '10:30', '11:30', '12:30']
+
+                for time in pred_time:
+                    if time == '06:30':
+                        next_time = '07:30'
+                    elif time == '07:30':
+                        next_time = '08:30'
+                    elif time == '08:30':
+                        next_time = '09:30'
+                    elif time == '09:30':
+                        next_time = '10:30'
+                    elif time == '10:30':
+                        next_time = '11:30'
+                    elif time == '11:30':
+                        next_time = '12:30'
+                    else:
+                        next_time = '12:30'
+
+                    candle_string = str(pred_date) + 'T' + str(time) + ':00-08:00'
+                    next_candle_string = str(pred_date) + 'T' + str(next_time) + ':00-08:00'
+                    selected_candle_data = spy_db.get(candle_string)
+                    next_selected_candle_data = spy_db.get(next_candle_string)
+                    st.dataframe(data=(pd.DataFrame(selected_candle_data, index=[0])),hide_index=True)
+
+                    if selected_candle_data is not None:
+                    #     download = spy_models.get('put_dt_model.pkl')
+                    #     download2 = spy_models.get('put_dt1_model.pkl')
+                    #     download3 = spy_models.get('put_rf1_model.pkl')
+                    #     new_dt = pickle.loads(download.read())
+                    #     new_dt2 = pickle.loads(download2.read())
+                    #     new_rf3 = pickle.loads(download3.read())
+
+                        close_price = selected_candle_data['close']
+                        remove_list = ['time', 'open', 'high', 'low', 'close', 'key']
+                        for key in remove_list:
+                            del selected_candle_data[key]
+
+                        predictor_df = pd.DataFrame(data=selected_candle_data, index=[0]).values
+                        #st.write(predictor_df)
+
+                        if p_new_dt.predict(predictor_df) == 1:
+                            st.write("ML Says Buy", " - ", close_price, " Target: ", close_price-0.5)
+                            if (next_selected_candle_data is not None):
+                                if next_selected_candle_data['change_low_open'] < -0.5:
+                                    st.write("Win: Low - ", next_selected_candle_data['low'], round(next_selected_candle_data['change_low_open'],2), " High - ", next_selected_candle_data['high'], round(next_selected_candle_data['change_high_open'],2))
+                                else:
+                                    st.write("Loss: Low - ", next_selected_candle_data['low'], round(next_selected_candle_data['change_low_open'],2), " High - ", next_selected_candle_data['high'], round(next_selected_candle_data['change_high_open'],2))
+                        else:
+                            st.write("ML Says Wait")
+
+                        if p_new_dt2.predict(predictor_df) == 1:
+                            st.write("ML NEW 50 Says Buy")
+                            pred_price = p_new_rf3.predict(predictor_df)
+                            st.write("Predicted Price: ", round((close_price+float(pred_price)), 2))
+                        else:
+                            st.write("ML NEW 50 Says Wait")
 
 
     return
